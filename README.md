@@ -82,7 +82,7 @@ Detalhes de responsabilidade, limites da API e regras do projeto estão em
 
 ## Dicionario de dados
 
-Numeros de 2026-11-20 17:15, fuso America/Sao_Paulo. O `coleta/qualidade.py` reescreve esta secao, entao ela nunca fica velha. O relatorio completo, com partidas dia por dia e versoes do jogo por semana, fica em `data/processed/qualidade.txt`.
+Numeros de 2026-11-20 17:24, fuso America/Sao_Paulo. O `coleta/qualidade.py` reescreve esta secao, entao ela nunca fica velha. O relatorio completo, com partidas dia por dia e versoes do jogo por semana, fica em `data/processed/qualidade.txt`.
 
 ### `daily_pickrate.csv`
 
@@ -94,7 +94,7 @@ Numeros de 2026-11-20 17:15, fuso America/Sao_Paulo. O `coleta/qualidade.py` ree
 | `picks` | inteiro | vezes que o campeao foi escolhido no dia |
 | `pick_rate` | decimal | `picks / games_total`, 6 casas |
 
-Estado atual: **13148 linhas**, 76 dias x 173 campeoes, a partir de **2346 partidas** da fila 420. 76 dos 76 dias do periodo tem partida.
+Estado atual: **13148 linhas**, 76 dias x 173 campeoes, a partir de **2593 partidas** da fila 420. 76 dos 76 dias do periodo tem partida.
 
 Ha uma linha para cada campeao em cada dia do periodo, inclusive dias com zero escolhas. Em dia sem partida nenhuma, `games_total` e `pick_rate` ficam em zero. A lista de campeoes sai dos proprios dados, entao cresce conforme campeoes novos aparecem na coleta.
 
@@ -112,6 +112,8 @@ Estado atual: **200 linhas**, das quais **30 sao lancamento de skin**, em 27 cam
 **Cuidado ao montar o `events.csv`.** Croma tem nome no formato `Nome da Skin (Cor)` e nao e lancamento nenhum. Uma skin com nove cromas ocupa dez linhas aqui, e contar as dez como evento faz o mesmo lancamento valer dez vezes na analise. Filtre nome com parentese.
 
 O Data Dragon sai dias depois do patch, entao `version` diz qual patch trouxe a skin, nao quando ela saiu. A data oficial do patch entra em `balance_changes.csv`, preenchida pela Pessoa 3.
+
+Para esse preenchimento, o `qualidade.txt` ja traz a data de cada patch **medida nas partidas do BR1**: o dia em que a versao nova aparece pela primeira vez, com o dia da semana e o vao desde o patch anterior. Quando a amostra pegou o dia em que as duas versoes convivem, a data e exata. Quando nao pegou, sai o intervalo em que o patch cabe, em vez de um dia inventado.
 
 ### Como a amostra foi montada
 

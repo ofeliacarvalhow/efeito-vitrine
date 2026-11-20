@@ -37,6 +37,8 @@ NOVAS_SKINS = RAIZ / "data" / "processed" / "new_skins.csv"
 LEIAME = RAIZ / "README.md"
 
 MINIMO_PARTIDAS_POR_DIA = 500
+DIAS_DA_SEMANA = ["segunda", "terca", "quarta", "quinta", "sexta",
+                  "sabado", "domingo"]
 MARCADOR_INICIO = "<!-- inicio do dicionario de dados -->"
 MARCADOR_FIM = "<!-- fim do dicionario de dados -->"
 
@@ -63,6 +65,9 @@ def le_bruto(janelas: list[tuple[date, date]]) -> dict:
     versoes_por_semana: dict[int, Counter] = {
         indice: Counter() for indice in range(1, len(janelas) + 1)
     }
+    #para medir em que dia cada patch entrou no BR1
+    dias_do_patch: dict[str, set[date]] = {}
+    partidas_do_patch: Counter = Counter()
     with open(PARTIDAS, encoding="utf-8") as arquivo:
         for linha in arquivo:
             linha = linha.strip()
@@ -92,16 +97,58 @@ def le_bruto(janelas: list[tuple[date, date]]) -> dict:
                 continue
             contagens["validas"] += 1
             por_dia[dia] += 1
+            patch = patch_da_versao(dados.get("gameVersion"))
+            dias_do_patch.setdefault(patch, set()).add(dia)
+            partidas_do_patch[patch] += 1
             semana = semana_do_dia(janelas, dia)
             if semana:
-                versoes_por_semana[semana][
-                    patch_da_versao(dados.get("gameVersion"))
-                ] += 1
+                versoes_por_semana[semana][patch] += 1
     return {
         "contagens": contagens,
         "por_dia": por_dia,
         "versoes_por_semana": versoes_por_semana,
+        "dias_do_patch": dias_do_patch,
+        "partidas_do_patch": partidas_do_patch,
     }
+
+
+def datas_dos_patches(dias_do_patch: dict[str, set[date]]) -> list[dict]:
+    """Em que dia cada patch entrou no BR1, medido nas partidas.
+
+    O patch entra num momento do dia, entao as partidas daquele dia tem as
+    duas versoes. Se a amostra pegou esse dia de virada, a data e exata. Se
+    nao pegou, o que se sabe e que o patch entrou depois da ultima partida da
+    versao anterior e ate a primeira partida da versao nova, e o relatorio
+    mostra esse intervalo em vez de inventar um dia.
+    """
+    ordem = sorted(dias_do_patch, key=lambda patch: min(dias_do_patch[patch]))
+    resultado: list[dict] = []
+    for posicao, patch in enumerate(ordem):
+        primeiro = min(dias_do_patch[patch])
+        ultimo = max(dias_do_patch[patch])
+        if posicao == 0:
+            resultado.append({
+                "patch": patch,
+                "de": None,
+                "ate": primeiro,
+                "exata": False,
+                "primeiro": primeiro,
+                "ultimo": ultimo,
+                "dias": len(dias_do_patch[patch]),
+            })
+            continue
+        anterior = ordem[posicao - 1]
+        fim_do_anterior = max(dias_do_patch[anterior])
+        resultado.append({
+            "patch": patch,
+            "de": fim_do_anterior,
+            "ate": primeiro,
+            "exata": fim_do_anterior == primeiro,
+            "primeiro": primeiro,
+            "ultimo": ultimo,
+            "dias": len(dias_do_patch[patch]),
+        })
+    return resultado
 
 
 def le_pickrate() -> dict:
@@ -196,6 +243,46 @@ def monta_relatorio(bruto: dict, janelas: list[tuple[date, date]],
         aviso = "  <- abaixo do minimo" if n < MINIMO_PARTIDAS_POR_DIA else ""
         partes.append(f"  {dia}  {n:6d}{aviso}")
     partes.append("")
+    partes.append("DATA DE CADA PATCH NO BR1")
+    partes.append("  medida nas partidas coletadas, nao copiada de fora. um")
+    partes.append("  patch entra num momento do dia, entao as partidas desse")
+    partes.append("  dia tem as duas versoes. quando a amostra pega esse dia,")
+    partes.append("  a data e exata. quando nao pega, sai o intervalo em que")
+    partes.append("  o patch cabe, em vez de um dia inventado.")
+    partes.append("")
+    patches = datas_dos_patches(bruto["dias_do_patch"])
+    partidas_do_patch = bruto["partidas_do_patch"]
+    anterior_exata = None
+    for item in patches:
+        patch = item["patch"]
+        quantas = partidas_do_patch.get(patch, 0)
+        plural = "dia" if item["dias"] == 1 else "dias"
+        amostra = f"{quantas} partidas em {item['dias']} {plural}"
+        semana = DIAS_DA_SEMANA[item["ate"].weekday()]
+        if item["de"] is None:
+            quando = f"ja estava no ar em {item['ate']}, inicio do periodo"
+        elif item["exata"]:
+            quando = (f"entrou em {item['ate']}, {semana}, "
+                      "dia de virada capturado")
+        else:
+            desde = DIAS_DA_SEMANA[item["de"].weekday()]
+            quando = (f"entrou entre {item['de']}, {desde}, e "
+                      f"{item['ate']}, {semana}")
+        if anterior_exata and item["exata"]:
+            vao = (item["ate"] - anterior_exata).days
+            quando += f", {vao} dias depois do anterior"
+        if item["exata"]:
+            anterior_exata = item["ate"]
+        partes.append(f"  {patch}: {quando}")
+        partes.append(f"         {amostra}, "
+                      f"de {item['primeiro']} a {item['ultimo']}")
+    exatas = sum(1 for item in patches if item["exata"])
+    partes.append("")
+    partes.append(f"  {exatas} de {len(patches)} patches com data exata. "
+                  "o resto aperta")
+    partes.append("  conforme a coleta avanca e mais dias de virada entram "
+                  "na amostra.")
+    partes.append("")
     partes.append("VERSOES DO JOGO POR SEMANA")
     for indice, (inicio, fim) in enumerate(janelas, start=1):
         contagem = bruto["versoes_por_semana"][indice]
@@ -288,6 +375,13 @@ def monta_dicionario(bruto: dict, pickrate: dict) -> str:
         "O Data Dragon sai dias depois do patch, entao `version` diz qual "
         "patch trouxe a skin, nao quando ela saiu. A data oficial do patch "
         "entra em `balance_changes.csv`, preenchida pela Pessoa 3.",
+        "",
+        "Para esse preenchimento, o `qualidade.txt` ja traz a data de cada "
+        "patch **medida nas partidas do BR1**: o dia em que a versao nova "
+        "aparece pela primeira vez, com o dia da semana e o vao desde o "
+        "patch anterior. Quando a amostra pegou o dia em que as duas versoes "
+        "convivem, a data e exata. Quando nao pegou, sai o intervalo em que "
+        "o patch cabe, em vez de um dia inventado.",
         "",
         "### Como a amostra foi montada",
         "",

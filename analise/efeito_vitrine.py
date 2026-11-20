@@ -455,6 +455,33 @@ def monta_relatorio(dados: dict) -> str:
     if dados.get("forcas"):
         partes.append(valida_contra_o_mock(dados))
 
+    partes.append("TESTE AGRUPADO POR TIPO DE EVENTO")
+    partes.append("  esta e a pergunta do projeto: skin levanta a taxa?")
+    partes.append("  clipe levanta? juntar todos os campeoes de todos os")
+    partes.append("  eventos do mesmo tipo ganha poder, porque a amostra de")
+    partes.append("  cada campeao e pequena mas eles erram para lados")
+    partes.append("  independentes. o numero por evento, acima, serve para")
+    partes.append("  olhar, e este serve para concluir.")
+    partes.append("")
+    partes.append(f"  {'tipo':12s} {'acima':>7s} {'de':>5s} {'chance':>8s}")
+    por_tipo: dict[str, list[dict]] = {}
+    for evento in dados["resultados"]:
+        for medida in evento["medidas"]:
+            if medida["percentil_do_pico"] is not None:
+                por_tipo.setdefault(evento["event_type"], []).append(medida)
+    for tipo in sorted(por_tipo):
+        medidas = por_tipo[tipo]
+        acima = sum(1 for m in medidas if m["percentil_do_pico"] > 50)
+        chance = prob_de_cauda(acima, len(medidas))
+        partes.append(f"  {tipo:12s} {acima:7d} {len(medidas):5d} "
+                      f"{chance:8.3f}")
+    partes.append("")
+    partes.append("  chance e a probabilidade de ver esse tanto de campeoes")
+    partes.append("  acima do tipico, ou mais, se o evento nao fizesse nada.")
+    partes.append("  abaixo de 0.05 comeca a valer conversa, e com quatro")
+    partes.append("  tipos testados o corte honesto fica mais perto de 0.01.")
+    partes.append("")
+
     partes.append("RESUMO")
     total = sum(len(e["medidas"]) for e in dados["resultados"])
     destacados = sum(

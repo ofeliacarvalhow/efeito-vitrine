@@ -123,6 +123,22 @@ TESTE DO METODO CONTRA O MOCK
   o mock plantou. muito abaixo de 1.00 e metodo cego, e
   muito acima e metodo que inventa efeito.
 
+TESTE AGRUPADO POR TIPO DE EVENTO
+  esta e a pergunta do projeto: skin levanta a taxa?
+  clipe levanta? juntar todos os campeoes de todos os
+  eventos do mesmo tipo ganha poder, porque a amostra de
+  cada campeao e pequena mas eles erram para lados
+  independentes. o numero por evento, acima, serve para
+  olhar, e este serve para concluir.
+
+  tipo           acima    de   chance
+  plantado          10    10    0.001
+
+  chance e a probabilidade de ver esse tanto de campeoes
+  acima do tipico, ou mais, se o evento nao fizesse nada.
+  abaixo de 0.05 comeca a valer conversa, e com quatro
+  tipos testados o corte honesto fica mais perto de 0.01.
+
 RESUMO
   10 pares campeao-evento medidos, 7 acima de p90
   por acaso, esperado acima de p90: 1.0

@@ -1,0 +1,121 @@
+EFEITO VITRINE: ANTES E DEPOIS
+fonte: data/mock/daily_pickrate.csv
+janela: 14 dias antes e 7 dias depois da data do evento
+periodo do dado: 2026-09-04 a 2026-11-18
+partidas por dia na amostra: media 1049
+
+COMO LER
+  lift e a taxa media depois dividida pela taxa antes.
+  1.00 e nenhuma mudanca, 1.50 e cinquenta por cento mais.
+  pico e a mesma conta usando a melhor janelinha de
+  3 dias dentro do depois. serve porque
+  efeito de novidade dura pouco e media longa o dilui:
+  no teste contra o mock, pico plantado de 2.1x aparece
+  como 1.41x na media de 14 dias.
+  percentil diz onde o numero cai na distribuicao dos
+  campeoes SEM evento nas mesmas datas. p50 e o tipico
+  do servidor naquele periodo, e so acima de
+  p90 o campeao se destacou do resto.
+  o intervalo e de 95%. se os dois intervalos se cruzam,
+  a amostra nao sustenta a diferenca.
+
+plantado-aphelios  (plantado, 2026-09-11)
+  pico plantado de forca 1.9
+  campeao         antes   depois    lift  perc    pico  perc         picks
+  Aphelios       0.0277   0.0364   1.31x  p100   1.47x  p100   209 /   267 *
+  acima de p90: 1 de 1 campeoes
+  grupo: 1 de 1 campeoes acima do tipico, chance 0.500 por acaso
+
+plantado-ezreal  (plantado, 2026-09-25)
+  pico plantado de forca 1.6
+  campeao         antes   depois    lift  perc    pico  perc         picks
+  Ezreal         0.0637   0.0786   1.23x   p97   1.37x   p97   929 /   578 *
+  acima de p90: 1 de 1 campeoes
+  grupo: 1 de 1 campeoes acima do tipico, chance 0.500 por acaso
+
+plantado-janna  (plantado, 2026-09-18)
+  pico plantado de forca 1.3
+  campeao         antes   depois    lift  perc    pico  perc         picks
+  Janna          0.0124   0.0133   1.07x   p62   1.14x   p71   184 /    96
+  acima de p90: 0 de 1 campeoes
+  grupo: 1 de 1 campeoes acima do tipico, chance 0.500 por acaso
+  [ressalva] 1 campeoes com os intervalos de 95% se cruzando: a amostra nao sustenta a diferenca
+
+plantado-kayn  (plantado, 2026-10-02)
+  pico plantado de forca 2.1
+  campeao         antes   depois    lift  perc    pico  perc         picks
+  Kayn           0.1063   0.1497   1.41x  p100   1.41x   p94  1551 /  1100 *
+  acima de p90: 1 de 1 campeoes
+  grupo: 1 de 1 campeoes acima do tipico, chance 0.500 por acaso
+
+plantado-ksante  (plantado, 2026-10-09)
+  pico plantado de forca 1.5
+  campeao         antes   depois    lift  perc    pico  perc         picks
+  KSante         0.0448   0.0532   1.19x   p84   1.26x   p84   658 /   385
+  acima de p90: 0 de 1 campeoes
+  grupo: 1 de 1 campeoes acima do tipico, chance 0.500 por acaso
+  [ressalva] 1 campeoes com os intervalos de 95% se cruzando: a amostra nao sustenta a diferenca
+
+plantado-mel  (plantado, 2026-10-30)
+  pico plantado de forca 2.3
+  campeao         antes   depois    lift  perc    pico  perc         picks
+  Mel            0.1238   0.1496   1.21x   p82   1.21x   p76  1822 /  1087
+  acima de p90: 0 de 1 campeoes
+  grupo: 1 de 1 campeoes acima do tipico, chance 0.500 por acaso
+
+plantado-qiyana  (plantado, 2026-11-06)
+  pico plantado de forca 1.6
+  campeao         antes   depois    lift  perc    pico  perc         picks
+  Qiyana         0.0305   0.0499   1.63x  p100   1.73x  p100   446 /   360 *
+  acima de p90: 1 de 1 campeoes
+  grupo: 1 de 1 campeoes acima do tipico, chance 0.500 por acaso
+
+plantado-senna  (plantado, 2026-11-13)
+  pico plantado de forca 1.4
+  campeao         antes   depois    lift  perc    pico  perc         picks
+  Senna          0.0141   0.0190   1.35x  p100   1.40x  p100   204 /   123 *
+  acima de p90: 1 de 1 campeoes
+  grupo: 1 de 1 campeoes acima do tipico, chance 0.500 por acaso
+  [ressalva] 1 campeoes com os intervalos de 95% se cruzando: a amostra nao sustenta a diferenca
+
+plantado-sett  (plantado, 2026-10-16)
+  pico plantado de forca 1.8
+  campeao         antes   depois    lift  perc    pico  perc         picks
+  Sett           0.0427   0.0701   1.64x  p100   1.88x  p100   623 /   517 *
+  acima de p90: 1 de 1 campeoes
+  grupo: 1 de 1 campeoes acima do tipico, chance 0.500 por acaso
+
+plantado-yone  (plantado, 2026-10-23)
+  pico plantado de forca 1.7
+  campeao         antes   depois    lift  perc    pico  perc         picks
+  Yone           0.0820   0.1149   1.40x  p100   1.53x  p100  1198 /   844 *
+  acima de p90: 1 de 1 campeoes
+  grupo: 1 de 1 campeoes acima do tipico, chance 0.500 por acaso
+
+TESTE DO METODO CONTRA O MOCK
+  o excesso do pico decai com exp(-atraso/5), e a janelinha de 3 dias pega em media 0.830 dele.
+  a taxa do mock para em 0.150, entao campeao de base alta tem teto proprio.
+
+  campeao       forca   teto  esperado  medido  razao
+  Aphelios      1.90x  5.42x     1.75x   1.47x  0.84
+  Ezreal        1.60x  2.35x     1.50x   1.37x  0.91
+  Janna         1.30x 12.14x     1.25x   1.14x  0.91
+  Kayn          2.10x  1.41x     1.41x   1.41x  1.00
+  KSante        1.50x  3.35x     1.41x   1.26x  0.89
+  Mel           2.30x  1.21x     1.21x   1.21x  1.00
+  Qiyana        1.60x  4.91x     1.50x   1.73x  1.16
+  Senna         1.40x 10.65x     1.33x   1.40x  1.05
+  Sett          1.80x  3.51x     1.66x   1.88x  1.13
+  Yone          1.70x  1.83x     1.58x   1.53x  0.97
+
+  10 de 10 dentro de 30% do esperado.
+  razao perto de 1.00 quer dizer que o metodo achou o que
+  o mock plantou. muito abaixo de 1.00 e metodo cego, e
+  muito acima e metodo que inventa efeito.
+
+RESUMO
+  10 pares campeao-evento medidos, 7 acima de p90
+  por acaso, esperado acima de p90: 1.0
+  se o numero de destaques nao passa do esperado por
+  acaso, o dado nao mostra efeito nenhum ainda.
+

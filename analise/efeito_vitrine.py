@@ -1,0 +1,576 @@
+"""
+Analise de antes e depois: a taxa de escolha sobe quando sai skin ou clipe?
+
+Para cada evento do events.csv compara a taxa de escolha do campeao numa
+janela antes e numa janela depois da data do evento, e situa esse resultado
+contra o que os campeoes SEM evento fizeram nas mesmas datas. Essa comparacao
+com o grupo de controle e o que separa um efeito de vitrine de uma mudanca que
+pegou o servidor todo, como um patch de balanceamento amplo ou o fim de uma
+temporada.
+
+Modo de teste: --mock roda contra data/mock/daily_pickrate.csv, onde os picos
+sao plantados com forca conhecida pelo coleta/gerar_mock.py. Se o metodo nao
+reencontra aqueles numeros, ele nao serve para o dado real. Rode o teste antes
+de acreditar no resultado.
+
+Rodar:  .venv\\Scripts\\python.exe analise\\efeito_vitrine.py
+Teste:  .venv\\Scripts\\python.exe analise\\efeito_vitrine.py --mock
+"""
+from __future__ import annotations
+
+import argparse
+import csv
+import math
+import os
+import sys
+from collections import defaultdict
+from datetime import date, timedelta
+import pathlib
+from pathlib import Path
+
+RAIZ = Path(__file__).resolve().parents[1]
+REAL = RAIZ / "data" / "processed" / "daily_pickrate.csv"
+MOCK = RAIZ / "data" / "mock" / "daily_pickrate.csv"
+EVENTOS = RAIZ / "data" / "processed" / "events.csv"
+#nome por modo, para o relatorio do teste nunca ser confundido com o do dado
+#real nem sobrescrever ele
+RELATORIOS = {
+    False: RAIZ / "analise" / "relatorio.txt",
+    True: RAIZ / "analise" / "relatorio_mock.txt",
+}
+GRAFICOS = {
+    False: RAIZ / "analise" / "efeito_vitrine.html",
+    True: RAIZ / "analise" / "efeito_vitrine_mock.html",
+}
+
+#janelas assimetricas de proposito. o efeito de novidade e curto e decai em
+#poucos dias, entao media de 14 dias depois dilui o pico ate quase sumir: no
+#teste contra o mock, pico plantado de 2.1x saiu medido como 1.41x com 14
+#dias e aparece bem melhor com 7. o antes fica longo porque ali o que se quer
+#e uma base estavel.
+JANELA_ANTES = 14
+JANELA_DEPOIS = 7
+#largura do pico, em dias, para a medida que nao depende de media longa
+LARGURA_DO_PICO = 3
+#minimo de dias de cada lado, depois de recortar no periodo disponivel
+MINIMO_DE_DIAS = 5
+#do coleta/gerar_mock.py, so para o modo de teste: o pico plantado decai com
+#exp(-atraso/5) e a taxa final e limitada a 15%. um campeao de base alta nao
+#consegue mostrar o pico inteiro, porque bate no teto antes.
+DECAIMENTO_DO_MOCK = 5.0
+TETO_DO_MOCK = 0.150
+#quanto o medido pode se afastar do esperado e ainda contar como recuperado
+TOLERANCIA = 0.30
+
+#um campeao so entra no controle se nao tiver evento nesta folga em volta
+FOLGA_DO_CONTROLE = 28
+#abaixo disso a taxa e ruido, e o relatorio avisa em vez de concluir
+PICKS_MINIMOS = 100
+#percentil acima do qual o lift se destaca do que os outros campeoes fizeram
+PERCENTIL_DE_CORTE = 90
+MAXIMO_DE_PAINEIS = 6
+
+
+def le_pickrate(caminho: Path):
+    """Devolve (picks por dia e campeao, partidas por dia, dias, campeoes)."""
+    picks: dict[tuple[date, str], int] = {}
+    partidas: dict[date, int] = {}
+    campeoes: set[str] = set()
+    with open(caminho, encoding="utf-8") as arquivo:
+        for registro in csv.DictReader(arquivo):
+            dia = date.fromisoformat(registro["date"])
+            campeao = registro["champion"]
+            picks[(dia, campeao)] = int(registro["picks"])
+            partidas[dia] = int(registro["games_total"])
+            campeoes.add(campeao)
+    return picks, partidas, sorted(partidas), sorted(campeoes)
+
+
+def le_eventos(caminho: Path) -> list[dict]:
+    if not caminho.exists():
+        return []
+    with open(caminho, encoding="utf-8") as arquivo:
+        return list(csv.DictReader(arquivo))
+
+
+def eventos_do_mock() -> list[dict]:
+    """Os picos plantados no mock, para testar o metodo contra a verdade."""
+    sys.path.insert(0, str(RAIZ / "coleta"))
+    from gerar_mock import EVENTOS_FALSOS
+
+    plantados = []
+    for campeao, dia, forca in EVENTOS_FALSOS:
+        plantados.append({
+            "event_id": f"plantado-{campeao.lower()}",
+            "champion": campeao,
+            "event_type": "plantado",
+            "event_date": dia.isoformat(),
+            "title": f"pico plantado de forca {forca}",
+            "youtube_id": "",
+            "views": "",
+            "forca": forca,
+        })
+    return plantados
+
+
+def soma(picks, partidas, dias, campeao: str, de: date,
+         ate: date) -> tuple[int, int]:
+    escolhas = 0
+    jogos = 0
+    for dia in dias:
+        if de <= dia <= ate:
+            escolhas += picks.get((dia, campeao), 0)
+            jogos += partidas.get(dia, 0)
+    return escolhas, jogos
+
+
+def wilson(sucessos: int, tentativas: int, z: float = 1.96):
+    """Intervalo de 95% para uma proporcao, sem precisar de scipy."""
+    if tentativas <= 0:
+        return 0.0, 0.0
+    p = sucessos / tentativas
+    denominador = 1 + z * z / tentativas
+    centro = (p + z * z / (2 * tentativas)) / denominador
+    margem = z * math.sqrt(
+        p * (1 - p) / tentativas + z * z / (4 * tentativas * tentativas)
+    ) / denominador
+    return max(0.0, centro - margem), min(1.0, centro + margem)
+
+
+def intervalo_da_taxa(escolhas: int, jogos: int):
+    #cada partida tem 10 vagas de campeao, entao a proporcao por vaga e
+    #escolhas / (10 * partidas), e a taxa do contrato e dez vezes isso
+    baixo, alto = wilson(escolhas, 10 * jogos)
+    return baixo * 10, alto * 10
+
+
+def prob_de_cauda(acima: int, total: int) -> float:
+    """Chance de ter `acima` ou mais de `total` campeoes passando do p50.
+
+    Debaixo da hipotese de que o evento nao faz nada, cada campeao tem meia
+    chance de cair acima do tipico dos campeoes sem evento, igual a moeda.
+    Quatro de quatro subindo juntos da 6%, e e por isso que olhar o grupo
+    pesa mais que olhar um campeao de cada vez: a amostra de cada um e
+    pequena, mas eles erram para lados independentes.
+    """
+    if total <= 0:
+        return 1.0
+    return sum(math.comb(total, i) for i in range(acima, total + 1)) / 2 ** total
+
+
+def percentil(valor: float, amostra: list[float]):
+    if not amostra:
+        return None
+    abaixo = sum(1 for x in amostra if x < valor)
+    return 100.0 * abaixo / len(amostra)
+
+
+def pico(picks, partidas, dias, campeao: str, de: date, ate: date,
+         largura: int) -> float:
+    """Maior taxa de escolha numa janelinha de `largura` dias no intervalo.
+
+    Mede o topo do pico em vez da media dele, o que nao se perde quando o
+    efeito dura poucos dias.
+    """
+    melhor = 0.0
+    inicio = de
+    while inicio + timedelta(days=largura - 1) <= ate:
+        escolhas, jogos = soma(picks, partidas, dias, campeao, inicio,
+                               inicio + timedelta(days=largura - 1))
+        if jogos:
+            melhor = max(melhor, escolhas / jogos)
+        inicio += timedelta(days=1)
+    return melhor
+
+
+def mede(picks, partidas, dias, campeao: str, dia_do_evento: date,
+         janela_antes: int, janela_depois: int) -> dict | None:
+    #recorta no periodo que existe, em vez de descartar o evento inteiro
+    antes_de = max(dias[0], dia_do_evento - timedelta(days=janela_antes))
+    antes_ate = dia_do_evento - timedelta(days=1)
+    depois_de = dia_do_evento
+    depois_ate = min(dias[-1],
+                     dia_do_evento + timedelta(days=janela_depois - 1))
+    dias_antes = (antes_ate - antes_de).days + 1
+    dias_depois = (depois_ate - depois_de).days + 1
+    if dias_antes < MINIMO_DE_DIAS or dias_depois < MINIMO_DE_DIAS:
+        return None
+    e_antes, j_antes = soma(picks, partidas, dias, campeao, antes_de, antes_ate)
+    e_depois, j_depois = soma(picks, partidas, dias, campeao, depois_de,
+                              depois_ate)
+    if j_antes == 0 or j_depois == 0 or e_antes == 0:
+        return None
+    taxa_antes = e_antes / j_antes
+    taxa_depois = e_depois / j_depois
+    topo = pico(picks, partidas, dias, campeao, depois_de, depois_ate,
+                min(LARGURA_DO_PICO, dias_depois))
+    return {
+        "campeao": campeao,
+        "taxa_antes": taxa_antes,
+        "taxa_depois": taxa_depois,
+        "lift": taxa_depois / taxa_antes,
+        "lift_do_pico": topo / taxa_antes if taxa_antes else 0.0,
+        "picks_antes": e_antes,
+        "picks_depois": e_depois,
+        "jogos_antes": j_antes,
+        "jogos_depois": j_depois,
+        "dias_antes": dias_antes,
+        "dias_depois": dias_depois,
+        "ic_antes": intervalo_da_taxa(e_antes, j_antes),
+        "ic_depois": intervalo_da_taxa(e_depois, j_depois),
+    }
+
+
+def controle(picks, partidas, dias, campeoes, dia_do_evento: date,
+             janela_antes: int, janela_depois: int,
+             com_evento: dict[str, list[date]]) -> dict[str, list[float]]:
+    """Lift dos campeoes sem evento perto desta data, nas mesmas janelas."""
+    lifts: list[float] = []
+    picos: list[float] = []
+    for campeao in campeoes:
+        datas = com_evento.get(campeao) or []
+        if any(abs((d - dia_do_evento).days) <= FOLGA_DO_CONTROLE
+               for d in datas):
+            continue
+        medida = mede(picks, partidas, dias, campeao, dia_do_evento,
+                      janela_antes, janela_depois)
+        if medida:
+            lifts.append(medida["lift"])
+            picos.append(medida["lift_do_pico"])
+    return {"lift": sorted(lifts), "pico": sorted(picos)}
+
+
+def nome_da_linha(event_id: str) -> str:
+    partes = event_id.split("-")
+    if partes[0] == "clipe":
+        return "-".join(partes[1:])
+    if partes[0] == "skin":
+        return "-".join(partes[2:])
+    return event_id
+
+
+def valida_contra_o_mock(dados: dict) -> str:
+    """Compara o pico medido com o maximo que o mock permitia.
+
+    Nao e o pico plantado cru. O mock decai o pico com exp(-atraso/5), e a
+    janelinha do pico pega varios dias, entao parte do excesso se perde por
+    construcao. E ele limita a taxa a 15%, entao campeao de base alta nao
+    consegue mostrar o pico inteiro de jeito nenhum. O esperado abaixo ja
+    desconta as duas coisas.
+    """
+    largura = min(LARGURA_DO_PICO, dados["depois"])
+    fator = sum(math.exp(-i / DECAIMENTO_DO_MOCK)
+                for i in range(largura)) / largura
+
+    partes: list[str] = []
+    partes.append("TESTE DO METODO CONTRA O MOCK")
+    partes.append(f"  o excesso do pico decai com exp(-atraso/"
+                  f"{DECAIMENTO_DO_MOCK:.0f}), e a janelinha de {largura} "
+                  f"dias pega em media {fator:.3f} dele.")
+    partes.append(f"  a taxa do mock para em {TETO_DO_MOCK:.3f}, entao "
+                  "campeao de base alta tem teto proprio.")
+    partes.append("")
+    partes.append(f"  {'campeao':12s} {'forca':>6s} {'teto':>6s} "
+                  f"{'esperado':>9s} {'medido':>7s} {'razao':>6s}")
+
+    recuperados = 0
+    total = 0
+    for evento in dados["resultados"]:
+        forca = dados["forcas"].get(evento["event_id"])
+        if forca is None:
+            continue
+        for medida in evento["medidas"]:
+            total += 1
+            teto = (TETO_DO_MOCK / medida["taxa_antes"]
+                    if medida["taxa_antes"] else float("inf"))
+            esperado = min(1 + (forca - 1) * fator, teto)
+            medido = medida["lift_do_pico"]
+            razao = medido / esperado if esperado else 0.0
+            if abs(razao - 1) <= TOLERANCIA:
+                recuperados += 1
+            partes.append(
+                f"  {medida['campeao'][:12]:12s} {forca:5.2f}x "
+                f"{teto:5.2f}x {esperado:8.2f}x {medido:6.2f}x "
+                f"{razao:5.2f}"
+            )
+    partes.append("")
+    partes.append(f"  {recuperados} de {total} dentro de "
+                  f"{TOLERANCIA:.0%} do esperado.")
+    partes.append("  razao perto de 1.00 quer dizer que o metodo achou o que")
+    partes.append("  o mock plantou. muito abaixo de 1.00 e metodo cego, e")
+    partes.append("  muito acima e metodo que inventa efeito.")
+    partes.append("")
+    return "\n".join(partes)
+
+
+def monta_relatorio(dados: dict) -> str:
+    partes: list[str] = []
+    partes.append("EFEITO VITRINE: ANTES E DEPOIS")
+    partes.append(f"fonte: {dados['fonte']}")
+    partes.append(f"janela: {dados['antes']} dias antes e "
+                  f"{dados['depois']} dias depois da data do evento")
+    partes.append(f"periodo do dado: {dados['dias'][0]} a {dados['dias'][-1]}")
+    media = sum(dados["partidas"].values()) / len(dados["dias"])
+    partes.append(f"partidas por dia na amostra: media {media:.0f}")
+    partes.append("")
+    partes.append("COMO LER")
+    partes.append("  lift e a taxa media depois dividida pela taxa antes.")
+    partes.append("  1.00 e nenhuma mudanca, 1.50 e cinquenta por cento mais.")
+    partes.append(f"  pico e a mesma conta usando a melhor janelinha de")
+    partes.append(f"  {LARGURA_DO_PICO} dias dentro do depois. serve porque")
+    partes.append("  efeito de novidade dura pouco e media longa o dilui:")
+    partes.append("  no teste contra o mock, pico plantado de 2.1x aparece")
+    partes.append("  como 1.41x na media de 14 dias.")
+    partes.append("  percentil diz onde o numero cai na distribuicao dos")
+    partes.append("  campeoes SEM evento nas mesmas datas. p50 e o tipico")
+    partes.append("  do servidor naquele periodo, e so acima de")
+    partes.append(f"  p{PERCENTIL_DE_CORTE} o campeao se destacou do resto.")
+    partes.append("  o intervalo e de 95%. se os dois intervalos se cruzam,")
+    partes.append("  a amostra nao sustenta a diferenca.")
+    partes.append("")
+
+    for evento in dados["resultados"]:
+        partes.append(f"{evento['event_id']}  ({evento['event_type']}, "
+                      f"{evento['event_date']})")
+        partes.append(f"  {evento['title'][:70]}")
+        if not evento["medidas"]:
+            partes.append("  sem janela completa no periodo, "
+                          "nao da para medir")
+            partes.append("")
+            continue
+        partes.append(f"  {'campeao':12s} {'antes':>8s} {'depois':>8s} "
+                      f"{'lift':>7s} {'perc':>5s} {'pico':>7s} {'perc':>5s} "
+                      f"{'picks':>13s}")
+        for medida in evento["medidas"]:
+            pos = medida["percentil"]
+            pos_pico = medida["percentil_do_pico"]
+            marca = f"p{pos:.0f}" if pos is not None else "-"
+            marca_pico = f"p{pos_pico:.0f}" if pos_pico is not None else "-"
+            destaque = " *" if (pos_pico is not None
+                                and pos_pico >= PERCENTIL_DE_CORTE) else ""
+            partes.append(
+                f"  {medida['campeao'][:12]:12s} "
+                f"{medida['taxa_antes']:8.4f} {medida['taxa_depois']:8.4f} "
+                f"{medida['lift']:6.2f}x {marca:>5s} "
+                f"{medida['lift_do_pico']:6.2f}x {marca_pico:>5s} "
+                f"{medida['picks_antes']:5d} / {medida['picks_depois']:5d}"
+                f"{destaque}"
+            )
+        magros = [m for m in evento["medidas"]
+                  if m["picks_antes"] < PICKS_MINIMOS]
+        cruzam = [m for m in evento["medidas"]
+                  if m["ic_antes"][1] >= m["ic_depois"][0]
+                  and m["ic_depois"][1] >= m["ic_antes"][0]]
+        acima = [m for m in evento["medidas"]
+                 if m["percentil_do_pico"] is not None
+                 and m["percentil_do_pico"] >= PERCENTIL_DE_CORTE]
+        partes.append(f"  acima de p{PERCENTIL_DE_CORTE}: {len(acima)} de "
+                      f"{len(evento['medidas'])} campeoes")
+        subiram = [m for m in evento["medidas"]
+                   if m["percentil_do_pico"] is not None
+                   and m["percentil_do_pico"] > 50]
+        com_percentil = [m for m in evento["medidas"]
+                         if m["percentil_do_pico"] is not None]
+        if com_percentil:
+            chance = prob_de_cauda(len(subiram), len(com_percentil))
+            partes.append(f"  grupo: {len(subiram)} de "
+                          f"{len(com_percentil)} campeoes acima do tipico, "
+                          f"chance {chance:.3f} por acaso")
+        if cruzam:
+            partes.append(f"  [ressalva] {len(cruzam)} campeoes com os "
+                          "intervalos de 95% se cruzando: a amostra nao "
+                          "sustenta a diferenca")
+        if magros:
+            partes.append(f"  [ressalva] {len(magros)} campeoes com menos de "
+                          f"{PICKS_MINIMOS} escolhas na janela de antes: "
+                          "numero ruidoso")
+        partes.append("")
+
+    if dados.get("forcas"):
+        partes.append(valida_contra_o_mock(dados))
+
+    partes.append("RESUMO")
+    total = sum(len(e["medidas"]) for e in dados["resultados"])
+    destacados = sum(
+        1 for e in dados["resultados"] for m in e["medidas"]
+        if m["percentil_do_pico"] is not None
+        and m["percentil_do_pico"] >= PERCENTIL_DE_CORTE
+    )
+    partes.append(f"  {total} pares campeao-evento medidos, {destacados} "
+                  f"acima de p{PERCENTIL_DE_CORTE}")
+    if total:
+        partes.append(f"  por acaso, esperado acima de p"
+                      f"{PERCENTIL_DE_CORTE}: "
+                      f"{total * (100 - PERCENTIL_DE_CORTE) / 100:.1f}")
+        partes.append("  se o numero de destaques nao passa do esperado por")
+        partes.append("  acaso, o dado nao mostra efeito nenhum ainda.")
+    partes.append("")
+    return "\n".join(partes) + "\n"
+
+
+def desenha(dados: dict, grafico: pathlib.Path) -> bool:
+    try:
+        import plotly.graph_objects as go
+        from plotly.subplots import make_subplots
+    except ImportError:
+        return False
+
+    por_linha: dict[str, list[dict]] = defaultdict(list)
+    for evento in dados["resultados"]:
+        if evento["medidas"]:
+            por_linha[nome_da_linha(evento["event_id"])].append(evento)
+    linhas = sorted(por_linha, key=lambda nome: -len(por_linha[nome]))
+    linhas = linhas[:MAXIMO_DE_PAINEIS]
+    if not linhas:
+        return False
+
+    figura = make_subplots(rows=len(linhas), cols=1, shared_xaxes=False,
+                           subplot_titles=linhas, vertical_spacing=0.08)
+    for posicao, nome in enumerate(linhas, start=1):
+        eventos = por_linha[nome]
+        campeoes = sorted({m["campeao"] for e in eventos
+                           for m in e["medidas"]})
+        for campeao in campeoes:
+            serie_x = []
+            serie_y = []
+            for dia in dados["dias"]:
+                jogos = dados["partidas"].get(dia, 0)
+                if not jogos:
+                    continue
+                serie_x.append(dia.isoformat())
+                serie_y.append(dados["picks"].get((dia, campeao), 0) / jogos)
+            figura.add_trace(
+                go.Scatter(x=serie_x, y=serie_y, mode="lines", name=campeao,
+                           legendgroup=nome, showlegend=posicao == 1),
+                row=posicao, col=1,
+            )
+        for evento in eventos:
+            figura.add_vline(
+                x=evento["event_date"],
+                line_width=1,
+                line_dash="dash",
+                annotation_text=evento["event_type"],
+                row=posicao, col=1,
+            )
+    figura.update_layout(
+        height=320 * len(linhas),
+        title="Taxa de escolha em volta de cada evento",
+        template="plotly_white",
+    )
+    grafico.parent.mkdir(parents=True, exist_ok=True)
+    figura.write_html(grafico, include_plotlyjs="cdn")
+    return True
+
+
+def main() -> int:
+    analisador = argparse.ArgumentParser(description="Analise antes e depois")
+    analisador.add_argument("--mock", action="store_true",
+                            help="roda no mock, com picos de forca conhecida")
+    analisador.add_argument("--antes", type=int, default=JANELA_ANTES,
+                            help="dias da janela antes do evento")
+    analisador.add_argument("--depois", type=int, default=JANELA_DEPOIS,
+                            help="dias da janela depois do evento")
+    argumentos = analisador.parse_args()
+
+    fonte = MOCK if argumentos.mock else REAL
+    if not fonte.exists():
+        print(f"[erro] {fonte} nao existe.")
+        return 1
+    picks, partidas, dias, campeoes = le_pickrate(fonte)
+
+    if argumentos.mock:
+        eventos = eventos_do_mock()
+    else:
+        eventos = le_eventos(EVENTOS)
+    if not eventos:
+        print("[erro] nenhum evento para analisar. "
+              "rode eventos/montar_eventos.py primeiro.")
+        return 1
+
+    com_evento: dict[str, list[date]] = defaultdict(list)
+    for linha in eventos:
+        com_evento[linha["champion"]].append(
+            date.fromisoformat(linha["event_date"])
+        )
+
+    agrupados: dict[str, list[dict]] = defaultdict(list)
+    for linha in eventos:
+        agrupados[linha["event_id"]].append(linha)
+
+    cache_controle: dict[tuple[date, int], list[float]] = {}
+    resultados = []
+    for event_id, linhas in sorted(agrupados.items()):
+        dia_do_evento = date.fromisoformat(linhas[0]["event_date"])
+        medidas = []
+        for linha in sorted(linhas, key=lambda l: l["champion"]):
+            medida = mede(picks, partidas, dias, linha["champion"],
+                          dia_do_evento, argumentos.antes, argumentos.depois)
+            if not medida:
+                continue
+            chave = (dia_do_evento, argumentos.antes, argumentos.depois)
+            if chave not in cache_controle:
+                cache_controle[chave] = controle(
+                    picks, partidas, dias, campeoes, dia_do_evento,
+                    argumentos.antes, argumentos.depois, com_evento
+                )
+            referencia = cache_controle[chave]
+            medida["percentil"] = percentil(medida["lift"],
+                                            referencia["lift"])
+            medida["percentil_do_pico"] = percentil(medida["lift_do_pico"],
+                                                    referencia["pico"])
+            medida["controle"] = len(referencia["lift"])
+            medidas.append(medida)
+        resultados.append({
+            "event_id": event_id,
+            "event_type": linhas[0]["event_type"],
+            "event_date": linhas[0]["event_date"],
+            "title": linhas[0]["title"],
+            "medidas": medidas,
+        })
+
+    dados = {
+        "fonte": fonte.relative_to(RAIZ).as_posix(),
+        "antes": argumentos.antes,
+        "depois": argumentos.depois,
+        "picks": picks,
+        "partidas": partidas,
+        "dias": dias,
+        "resultados": resultados,
+        "forcas": {linha["event_id"]: linha["forca"] for linha in eventos
+                   if "forca" in linha},
+    }
+
+    alvo = RELATORIOS[argumentos.mock]
+    grafico = GRAFICOS[argumentos.mock]
+    relatorio = monta_relatorio(dados)
+    alvo.parent.mkdir(parents=True, exist_ok=True)
+    parcial = alvo.parent / (alvo.name + ".parcial")
+    parcial.write_text(relatorio, encoding="utf-8")
+    os.replace(parcial, alvo)
+    print(f"{alvo.relative_to(RAIZ)}: "
+          f"{len(relatorio.splitlines())} linhas")
+    if desenha(dados, grafico):
+        print(f"{grafico.relative_to(RAIZ)}: grafico por evento")
+
+    medidos = sum(len(e["medidas"]) for e in resultados)
+    destacados = sum(
+        1 for e in resultados for m in e["medidas"]
+        if m["percentil_do_pico"] is not None
+        and m["percentil_do_pico"] >= PERCENTIL_DE_CORTE
+    )
+    print("")
+    print(f"eventos: {len(resultados)} | pares campeao-evento medidos: "
+          f"{medidos} | acima de p{PERCENTIL_DE_CORTE}: {destacados}")
+    if medidos:
+        print(f"esperado por acaso acima de p{PERCENTIL_DE_CORTE}: "
+              f"{medidos * (100 - PERCENTIL_DE_CORTE) / 100:.1f}")
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        print("")
+        print("interrompido pelo teclado.")
+        sys.exit(130)

@@ -22,6 +22,7 @@ import argparse
 import csv
 import math
 import os
+import random
 import sys
 from collections import defaultdict
 from datetime import date, timedelta
@@ -70,6 +71,9 @@ PICKS_MINIMOS = 100
 #percentil acima do qual o lift se destaca do que os outros campeoes fizeram
 PERCENTIL_DE_CORTE = 90
 MAXIMO_DE_PAINEIS = 6
+#repeticoes do teste de placebo e semente, para o numero ser reproduzivel
+REPETICOES_PLACEBO = 200
+SEMENTE_PLACEBO = 20260904
 
 
 def le_pickrate(caminho: Path):
@@ -132,15 +136,37 @@ def eventos_do_mock() -> list[dict]:
     return plantados
 
 
-def soma(picks, partidas, dias, campeao: str, de: date,
-         ate: date) -> tuple[int, int]:
-    escolhas = 0
-    jogos = 0
-    for dia in dias:
-        if de <= dia <= ate:
-            escolhas += picks.get((dia, campeao), 0)
-            jogos += partidas.get(dia, 0)
-    return escolhas, jogos
+def prepara_tabela(picks, partidas, dias, campeoes) -> dict:
+    """Somas acumuladas por dia, para a janela sair em tempo constante.
+
+    Sem isso cada soma varre os 76 dias, e o teste de placebo, que repete a
+    medida centenas de vezes com datas sorteadas, levaria dezenas de minutos
+    em vez de segundos.
+    """
+    indice = {dia: i for i, dia in enumerate(dias)}
+    jogos = [0] * (len(dias) + 1)
+    for i, dia in enumerate(dias):
+        jogos[i + 1] = jogos[i] + partidas.get(dia, 0)
+    escolhas = {}
+    for campeao in campeoes:
+        linha = [0] * (len(dias) + 1)
+        for i, dia in enumerate(dias):
+            linha[i + 1] = linha[i] + picks.get((dia, campeao), 0)
+        escolhas[campeao] = linha
+    return {"dias": dias, "indice": indice, "jogos": jogos,
+            "escolhas": escolhas, "campeoes": campeoes}
+
+
+def soma(tabela, campeao: str, de: date, ate: date) -> tuple[int, int]:
+    comeco = tabela["indice"].get(de)
+    fim = tabela["indice"].get(ate)
+    if comeco is None or fim is None or fim < comeco:
+        return 0, 0
+    linha = tabela["escolhas"].get(campeao)
+    vagas = tabela["jogos"][fim + 1] - tabela["jogos"][comeco]
+    if linha is None:
+        return 0, vagas
+    return linha[fim + 1] - linha[comeco], vagas
 
 
 def wilson(sucessos: int, tentativas: int, z: float = 1.96):
@@ -184,7 +210,7 @@ def percentil(valor: float, amostra: list[float]):
     return 100.0 * abaixo / len(amostra)
 
 
-def pico(picks, partidas, dias, campeao: str, de: date, ate: date,
+def pico(tabela, campeao: str, de: date, ate: date,
          largura: int) -> float:
     """Maior taxa de escolha numa janelinha de `largura` dias no intervalo.
 
@@ -194,7 +220,7 @@ def pico(picks, partidas, dias, campeao: str, de: date, ate: date,
     melhor = 0.0
     inicio = de
     while inicio + timedelta(days=largura - 1) <= ate:
-        escolhas, jogos = soma(picks, partidas, dias, campeao, inicio,
+        escolhas, jogos = soma(tabela, campeao, inicio,
                                inicio + timedelta(days=largura - 1))
         if jogos:
             melhor = max(melhor, escolhas / jogos)
@@ -213,23 +239,22 @@ def limites_da_janela(dias, dia_do_evento: date, janela_antes: int,
     return antes_de, antes_ate, depois_de, depois_ate
 
 
-def mede(picks, partidas, dias, campeao: str, dia_do_evento: date,
+def mede(tabela, campeao: str, dia_do_evento: date,
          janela_antes: int, janela_depois: int) -> dict | None:
     antes_de, antes_ate, depois_de, depois_ate = limites_da_janela(
-        dias, dia_do_evento, janela_antes, janela_depois
+        tabela["dias"], dia_do_evento, janela_antes, janela_depois
     )
     dias_antes = (antes_ate - antes_de).days + 1
     dias_depois = (depois_ate - depois_de).days + 1
     if dias_antes < MINIMO_DE_DIAS or dias_depois < MINIMO_DE_DIAS:
         return None
-    e_antes, j_antes = soma(picks, partidas, dias, campeao, antes_de, antes_ate)
-    e_depois, j_depois = soma(picks, partidas, dias, campeao, depois_de,
-                              depois_ate)
+    e_antes, j_antes = soma(tabela, campeao, antes_de, antes_ate)
+    e_depois, j_depois = soma(tabela, campeao, depois_de, depois_ate)
     if j_antes == 0 or j_depois == 0 or e_antes == 0:
         return None
     taxa_antes = e_antes / j_antes
     taxa_depois = e_depois / j_depois
-    topo = pico(picks, partidas, dias, campeao, depois_de, depois_ate,
+    topo = pico(tabela, campeao, depois_de, depois_ate,
                 min(LARGURA_DO_PICO, dias_depois))
     return {
         "campeao": campeao,
@@ -255,7 +280,7 @@ def mexido_na_janela(balanceamento: dict[str, list[date]], campeao: str,
                for quando in balanceamento.get(campeao, []))
 
 
-def controle(picks, partidas, dias, campeoes, dia_do_evento: date,
+def controle(tabela, campeoes, dia_do_evento: date,
              janela_antes: int, janela_depois: int,
              com_evento: dict[str, list[date]],
              balanceamento: dict[str, list[date]]) -> dict:
@@ -266,7 +291,7 @@ def controle(picks, partidas, dias, campeoes, dia_do_evento: date,
     nada fez ali. Mexida de dois meses antes nao atrapalha e fica.
     """
     antes_de, _, _, depois_ate = limites_da_janela(
-        dias, dia_do_evento, janela_antes, janela_depois
+        tabela["dias"], dia_do_evento, janela_antes, janela_depois
     )
     lifts: list[float] = []
     picos: list[float] = []
@@ -281,7 +306,7 @@ def controle(picks, partidas, dias, campeoes, dia_do_evento: date,
         if mexido_na_janela(balanceamento, campeao, antes_de, depois_ate):
             fora_por_mexida += 1
             continue
-        medida = mede(picks, partidas, dias, campeao, dia_do_evento,
+        medida = mede(tabela, campeao, dia_do_evento,
                       janela_antes, janela_depois)
         if medida:
             lifts.append(medida["lift"])
@@ -292,6 +317,81 @@ def controle(picks, partidas, dias, campeoes, dia_do_evento: date,
         "fora_por_evento": fora_por_evento,
         "fora_por_mexida": fora_por_mexida,
     }
+
+
+def destaques_distintos(pares: list[tuple[str, date]], janela: int) -> int:
+    """Conta momentos distintos, nao pares campeao-evento.
+
+    Dois eventos do mesmo campeao em datas proximas medem o mesmo pedaco da
+    serie e nao sao duas evidencias. A Evelynn ganhou duas skins no mesmo
+    patch, o que dava a mesma medida contada duas vezes, e o Aphelios teve
+    clipe e trailer com quatro dias de diferenca, com as janelas quase
+    sobrepostas. Sem esse corte o numero real infla e o placebo nao, porque
+    no placebo as datas sorteadas caem longe umas das outras.
+    """
+    por_campeao: dict[str, list[date]] = defaultdict(list)
+    for campeao, quando in pares:
+        por_campeao[campeao].append(quando)
+    total = 0
+    for datas in por_campeao.values():
+        ultimo = None
+        for quando in sorted(datas):
+            if ultimo is None or (quando - ultimo).days > janela:
+                total += 1
+                ultimo = quando
+    return total
+
+
+def placebo(tabela, campeoes, eventos_reais: list[tuple[str, list[str]]],
+            janela_antes: int, janela_depois: int,
+            balanceamento: dict[str, list[date]], repeticoes: int,
+            semente: int) -> list[int]:
+    """Repete a medida inteira com datas de evento sorteadas.
+
+    Serve para responder a pergunta que derruba qualquer analise de antes e
+    depois: quantos destaques esse metodo produz quando NAO ha efeito
+    nenhum? Os campeoes de cada evento sao os de verdade, so a data e
+    falsa. Se o numero de destaques com data falsa for parecido com o
+    numero com data real, o resultado real nao diz nada.
+    """
+    sorteio = random.Random(semente)
+    dias = tabela["dias"]
+    #so datas que deixam janela suficiente dos dois lados, igual ao real
+    possiveis = [
+        dia for dia in dias
+        if (dia - dias[0]).days >= MINIMO_DE_DIAS
+        and (dias[-1] - dia).days >= MINIMO_DE_DIAS - 1
+    ]
+    if not possiveis:
+        return []
+
+    contagens: list[int] = []
+    for _ in range(repeticoes):
+        datas_falsas = [sorteio.choice(possiveis) for _ in eventos_reais]
+        com_evento: dict[str, list[date]] = defaultdict(list)
+        for (_, nomes), quando in zip(eventos_reais, datas_falsas):
+            for campeao in nomes:
+                com_evento[campeao].append(quando)
+
+        cache: dict[date, dict] = {}
+        marcados: list[tuple[str, date]] = []
+        for (_, nomes), quando in zip(eventos_reais, datas_falsas):
+            for campeao in nomes:
+                medida = mede(tabela, campeao, quando, janela_antes,
+                              janela_depois)
+                if not medida:
+                    continue
+                if quando not in cache:
+                    cache[quando] = controle(
+                        tabela, campeoes, quando, janela_antes,
+                        janela_depois, com_evento, balanceamento
+                    )
+                posicao = percentil(medida["lift_do_pico"],
+                                    cache[quando]["pico"])
+                if posicao is not None and posicao >= PERCENTIL_DE_CORTE:
+                    marcados.append((campeao, quando))
+        contagens.append(destaques_distintos(marcados, janela_depois))
+    return contagens
 
 
 def nome_da_linha(event_id: str) -> str:
@@ -353,6 +453,46 @@ def valida_contra_o_mock(dados: dict) -> str:
     partes.append("  razao perto de 1.00 quer dizer que o metodo achou o que")
     partes.append("  o mock plantou. muito abaixo de 1.00 e metodo cego, e")
     partes.append("  muito acima e metodo que inventa efeito.")
+    partes.append("")
+    return "\n".join(partes)
+
+
+def bloco_do_placebo(dados: dict) -> str:
+    contagens = sorted(dados["placebo"])
+    real = dados["acima_de_verdade"]
+    tantos = sum(1 for c in contagens if c >= real)
+    chance = tantos / len(contagens)
+    media = sum(contagens) / len(contagens)
+    partes = ["TESTE DE PLACEBO"]
+    partes.append(f"  a medida inteira foi repetida {len(contagens)} vezes "
+                  "com a data de")
+    partes.append("  cada evento sorteada, mantendo os campeoes de verdade.")
+    partes.append("  isso mostra quantos destaques o metodo inventa quando "
+                  "nao ha")
+    partes.append("  efeito nenhum para achar.")
+    partes.append("")
+    partes.append(f"  momentos campeao-data distintos com destaque: {real}")
+    partes.append(f"  pares campeao-evento marcados, antes do corte: "
+                  f"{dados['pares_de_verdade']}")
+    partes.append(f"  destaques com data sorteada:   media {media:.1f}, "
+                  f"minimo {contagens[0]}, maximo {contagens[-1]}")
+    partes.append(f"  percentil 95 do sorteio:       "
+                  f"{contagens[int(0.95 * (len(contagens) - 1))]}")
+    partes.append(f"  sorteios que empataram ou passaram o real: "
+                  f"{tantos} de {len(contagens)}, ou seja {chance:.3f}")
+    partes.append("")
+    if chance > 0.10:
+        partes.append("  leitura: o resultado real cabe tranquilamente no "
+                      "que o acaso")
+        partes.append("  produz. nao ha efeito para relatar.")
+    elif chance > 0.05:
+        partes.append("  leitura: o resultado real esta na beirada do que o "
+                      "acaso produz.")
+        partes.append("  sugere algo, nao sustenta conclusao.")
+    else:
+        partes.append("  leitura: o acaso raramente produz tanto destaque "
+                      "assim.")
+        partes.append("  aqui ha efeito a relatar.")
     partes.append("")
     return "\n".join(partes)
 
@@ -454,6 +594,9 @@ def monta_relatorio(dados: dict) -> str:
 
     if dados.get("forcas"):
         partes.append(valida_contra_o_mock(dados))
+
+    if dados.get("placebo"):
+        partes.append(bloco_do_placebo(dados))
 
     partes.append("TESTE AGRUPADO POR TIPO DE EVENTO")
     partes.append("  esta e a pergunta do projeto: skin levanta a taxa?")
@@ -563,6 +706,8 @@ def main() -> int:
                             help="dias da janela antes do evento")
     analisador.add_argument("--depois", type=int, default=JANELA_DEPOIS,
                             help="dias da janela depois do evento")
+    analisador.add_argument("--placebo", type=int, default=REPETICOES_PLACEBO,
+                            help="repeticoes do teste de placebo, 0 desliga")
     argumentos = analisador.parse_args()
 
     fonte = MOCK if argumentos.mock else REAL
@@ -570,6 +715,7 @@ def main() -> int:
         print(f"[erro] {fonte} nao existe.")
         return 1
     picks, partidas, dias, campeoes = le_pickrate(fonte)
+    tabela = prepara_tabela(picks, partidas, dias, campeoes)
 
     if argumentos.mock:
         eventos = eventos_do_mock()
@@ -601,14 +747,14 @@ def main() -> int:
         dia_do_evento = date.fromisoformat(linhas[0]["event_date"])
         medidas = []
         for linha in sorted(linhas, key=lambda l: l["champion"]):
-            medida = mede(picks, partidas, dias, linha["champion"],
+            medida = mede(tabela, linha["champion"],
                           dia_do_evento, argumentos.antes, argumentos.depois)
             if not medida:
                 continue
             chave = (dia_do_evento, argumentos.antes, argumentos.depois)
             if chave not in cache_controle:
                 cache_controle[chave] = controle(
-                    picks, partidas, dias, campeoes, dia_do_evento,
+                    tabela, campeoes, dia_do_evento,
                     argumentos.antes, argumentos.depois, com_evento,
                     balanceamento
                 )
@@ -621,7 +767,8 @@ def main() -> int:
             medida["fora_por_mexida"] = referencia["fora_por_mexida"]
             #o proprio campeao do evento levou mexida dentro da janela?
             antes_de, _, _, depois_ate = limites_da_janela(
-                dias, dia_do_evento, argumentos.antes, argumentos.depois
+                tabela["dias"], dia_do_evento, argumentos.antes,
+                argumentos.depois
             )
             medida["confundido"] = mexido_na_janela(
                 balanceamento, linha["champion"], antes_de, depois_ate
@@ -635,8 +782,34 @@ def main() -> int:
             "medidas": medidas,
         })
 
+    marcados_de_verdade = [
+        (m["campeao"], date.fromisoformat(e["event_date"]))
+        for e in resultados for m in e["medidas"]
+        if m["percentil_do_pico"] is not None
+        and m["percentil_do_pico"] >= PERCENTIL_DE_CORTE
+    ]
+    pares_de_verdade = len(marcados_de_verdade)
+    acima_de_verdade = destaques_distintos(marcados_de_verdade,
+                                           argumentos.depois)
+    contagens_do_placebo: list[int] = []
+    if argumentos.placebo > 0:
+        eventos_reais = [
+            (event_id, [l["champion"] for l in linhas])
+            for event_id, linhas in sorted(agrupados.items())
+        ]
+        print(f"rodando o placebo, {argumentos.placebo} repeticoes com data "
+              "sorteada")
+        contagens_do_placebo = placebo(
+            tabela, campeoes, eventos_reais, argumentos.antes,
+            argumentos.depois, balanceamento, argumentos.placebo,
+            SEMENTE_PLACEBO,
+        )
+
     dados = {
         "fonte": fonte.relative_to(RAIZ).as_posix(),
+        "placebo": contagens_do_placebo,
+        "acima_de_verdade": acima_de_verdade,
+        "pares_de_verdade": pares_de_verdade,
         "antes": argumentos.antes,
         "depois": argumentos.depois,
         "picks": picks,

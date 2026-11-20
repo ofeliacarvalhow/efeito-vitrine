@@ -239,6 +239,21 @@ trailer-true-damage-know-my-name  (trailer, 2026-10-06)
   [ressalva] 5 campeoes com os intervalos de 95% se cruzando: a amostra nao sustenta a diferenca
   [ressalva] 1 campeoes com menos de 100 escolhas na janela de antes: numero ruidoso
 
+TESTE DE PLACEBO
+  a medida inteira foi repetida 200 vezes com a data de
+  cada evento sorteada, mantendo os campeoes de verdade.
+  isso mostra quantos destaques o metodo inventa quando nao ha
+  efeito nenhum para achar.
+
+  momentos campeao-data distintos com destaque: 6
+  pares campeao-evento marcados, antes do corte: 8
+  destaques com data sorteada:   media 3.6, minimo 0, maximo 9
+  percentil 95 do sorteio:       6
+  sorteios que empataram ou passaram o real: 21 de 200, ou seja 0.105
+
+  leitura: o resultado real cabe tranquilamente no que o acaso
+  produz. nao ha efeito para relatar.
+
 TESTE AGRUPADO POR TIPO DE EVENTO
   esta e a pergunta do projeto: skin levanta a taxa?
   clipe levanta? juntar todos os campeoes de todos os

@@ -123,6 +123,21 @@ TESTE DO METODO CONTRA O MOCK
   o mock plantou. muito abaixo de 1.00 e metodo cego, e
   muito acima e metodo que inventa efeito.
 
+TESTE DE PLACEBO
+  a medida inteira foi repetida 200 vezes com a data de
+  cada evento sorteada, mantendo os campeoes de verdade.
+  isso mostra quantos destaques o metodo inventa quando nao ha
+  efeito nenhum para achar.
+
+  momentos campeao-data distintos com destaque: 7
+  pares campeao-evento marcados, antes do corte: 7
+  destaques com data sorteada:   media 0.8, minimo 0, maximo 4
+  percentil 95 do sorteio:       2
+  sorteios que empataram ou passaram o real: 0 de 200, ou seja 0.000
+
+  leitura: o acaso raramente produz tanto destaque assim.
+  aqui ha efeito a relatar.
+
 TESTE AGRUPADO POR TIPO DE EVENTO
   esta e a pergunta do projeto: skin levanta a taxa?
   clipe levanta? juntar todos os campeoes de todos os

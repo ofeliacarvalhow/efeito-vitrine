@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 import random
 import sqlite3
 import sys
@@ -26,6 +27,7 @@ from datetime import date, datetime, timedelta
 import riot_api
 from config import (
     ARQUIVO_LOG,
+    ARQUIVO_TRAVA,
     BANCO,
     DATA_FINAL,
     DATA_INICIAL,
@@ -97,6 +99,42 @@ def prepara_log() -> logging.Logger:
     log.addHandler(arquivo)
     log.addHandler(tela)
     return log
+
+
+def trava_instancia_unica(log: logging.Logger):
+    """Garante um coletor so neste projeto.
+
+    Dois coletores brigam pelo banco e um morre no meio, com um traceback de
+    "database is locked" que nao explica nada. A trava e um bloqueio de
+    arquivo do proprio sistema operacional, que ele solta sozinho quando o
+    processo termina, inclusive em queda de energia, entao nunca sobra trava
+    velha para limpar na mao.
+
+    Devolve o arquivo aberto, que precisa ficar vivo enquanto o coletor
+    roda: se ele for fechado, a trava sai junto.
+    """
+    ARQUIVO_TRAVA.parent.mkdir(parents=True, exist_ok=True)
+    arquivo = open(ARQUIVO_TRAVA, "a+", encoding="utf-8")
+    arquivo.seek(0)
+    try:
+        try:
+            import msvcrt
+            msvcrt.locking(arquivo.fileno(), msvcrt.LK_NBLCK, 1)
+        except ImportError:
+            import fcntl
+            fcntl.flock(arquivo.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        arquivo.close()
+        log.info("[trava] ja existe um coletor rodando neste projeto.")
+        log.info("[trava] dois ao mesmo tempo brigam pelo banco e um morre "
+                 "no meio da coleta.")
+        log.info("[trava] pare o outro antes, ou deixe ele terminar.")
+        sys.exit(3)
+    arquivo.seek(0)
+    arquivo.truncate()
+    arquivo.write(f"{os.getpid()}\n")
+    arquivo.flush()
+    return arquivo
 
 
 def abre_banco() -> sqlite3.Connection:
@@ -482,6 +520,9 @@ def main() -> int:
 
     random.seed(SEMENTE_SORTEIO)
     log = prepara_log()
+    #a trava vem antes de tudo, para o segundo coletor sair com recado em
+    #vez de traceback de banco travado
+    trava = trava_instancia_unica(log)
     con = abre_banco()
     cliente = ClienteRiot(aviso=log.info)
 
@@ -535,6 +576,7 @@ def main() -> int:
                  f"execucao, {baixadas} no total, "
                  f"{cliente.requisicoes} requisicoes.")
         con.close()
+        trava.close()
     return 0
 
 

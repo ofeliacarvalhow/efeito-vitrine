@@ -83,6 +83,9 @@ PATCHES = ["16.17", "16.18", "16.19", "16.20", "16.21", "16.22", "16.23"]
 PATCH_BASE = "16.16"
 
 BANCO = RAIZ / "data" / "raw" / "coleta.sqlite"
+#trava de instancia unica. o sistema solta sozinho quando o processo morre,
+#inclusive em queda de energia, entao nao sobra trava velha.
+ARQUIVO_TRAVA = RAIZ / "data" / "raw" / "coletor.lock"
 CACHE_DDRAGON = RAIZ / "data" / "cache_ddragon"
 PARTIDAS = RAIZ / "data" / "raw" / "matches.jsonl"
 ARQUIVO_LOG = RAIZ / "coleta" / "coletar.log"

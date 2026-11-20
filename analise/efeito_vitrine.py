@@ -32,6 +32,7 @@ RAIZ = Path(__file__).resolve().parents[1]
 REAL = RAIZ / "data" / "processed" / "daily_pickrate.csv"
 MOCK = RAIZ / "data" / "mock" / "daily_pickrate.csv"
 EVENTOS = RAIZ / "data" / "processed" / "events.csv"
+BALANCEAMENTO = RAIZ / "data" / "processed" / "balance_changes.csv"
 #nome por modo, para o relatorio do teste nunca ser confundido com o do dado
 #real nem sobrescrever ele
 RELATORIOS = {
@@ -91,6 +92,24 @@ def le_eventos(caminho: Path) -> list[dict]:
         return []
     with open(caminho, encoding="utf-8") as arquivo:
         return list(csv.DictReader(arquivo))
+
+
+def le_balanceamento(caminho: Path) -> dict[str, list[date]]:
+    """{campeao: [datas de patch em que ele foi mexido]}."""
+    if not caminho.exists():
+        print(f"[aviso] {caminho.name} nao existe, entao a analise roda SEM "
+              "controlar por balanceamento. rode "
+              "coleta/datadragon_balanceamento.py.")
+        return {}
+    mexidas: dict[str, list[date]] = defaultdict(list)
+    with open(caminho, encoding="utf-8") as arquivo:
+        for registro in csv.DictReader(arquivo):
+            try:
+                quando = date.fromisoformat(registro["patch_date"])
+            except (ValueError, KeyError):
+                continue
+            mexidas[registro["champion"]].append(quando)
+    return dict(mexidas)
 
 
 def eventos_do_mock() -> list[dict]:
@@ -183,14 +202,22 @@ def pico(picks, partidas, dias, campeao: str, de: date, ate: date,
     return melhor
 
 
-def mede(picks, partidas, dias, campeao: str, dia_do_evento: date,
-         janela_antes: int, janela_depois: int) -> dict | None:
+def limites_da_janela(dias, dia_do_evento: date, janela_antes: int,
+                      janela_depois: int):
     #recorta no periodo que existe, em vez de descartar o evento inteiro
     antes_de = max(dias[0], dia_do_evento - timedelta(days=janela_antes))
     antes_ate = dia_do_evento - timedelta(days=1)
     depois_de = dia_do_evento
     depois_ate = min(dias[-1],
                      dia_do_evento + timedelta(days=janela_depois - 1))
+    return antes_de, antes_ate, depois_de, depois_ate
+
+
+def mede(picks, partidas, dias, campeao: str, dia_do_evento: date,
+         janela_antes: int, janela_depois: int) -> dict | None:
+    antes_de, antes_ate, depois_de, depois_ate = limites_da_janela(
+        dias, dia_do_evento, janela_antes, janela_depois
+    )
     dias_antes = (antes_ate - antes_de).days + 1
     dias_depois = (depois_ate - depois_de).days + 1
     if dias_antes < MINIMO_DE_DIAS or dias_depois < MINIMO_DE_DIAS:
@@ -221,23 +248,50 @@ def mede(picks, partidas, dias, campeao: str, dia_do_evento: date,
     }
 
 
+def mexido_na_janela(balanceamento: dict[str, list[date]], campeao: str,
+                     de: date, ate: date) -> bool:
+    """O campeao levou mudanca de balanceamento dentro desta janela?"""
+    return any(de <= quando <= ate
+               for quando in balanceamento.get(campeao, []))
+
+
 def controle(picks, partidas, dias, campeoes, dia_do_evento: date,
              janela_antes: int, janela_depois: int,
-             com_evento: dict[str, list[date]]) -> dict[str, list[float]]:
-    """Lift dos campeoes sem evento perto desta data, nas mesmas janelas."""
+             com_evento: dict[str, list[date]],
+             balanceamento: dict[str, list[date]]) -> dict:
+    """Lift dos campeoes sem evento e sem mexida perto desta data.
+
+    Tira do controle quem foi buffado ou nerfado dentro da janela, porque
+    campeao mexido no meio da medida nao representa o que um campeao sem
+    nada fez ali. Mexida de dois meses antes nao atrapalha e fica.
+    """
+    antes_de, _, _, depois_ate = limites_da_janela(
+        dias, dia_do_evento, janela_antes, janela_depois
+    )
     lifts: list[float] = []
     picos: list[float] = []
+    fora_por_evento = 0
+    fora_por_mexida = 0
     for campeao in campeoes:
         datas = com_evento.get(campeao) or []
         if any(abs((d - dia_do_evento).days) <= FOLGA_DO_CONTROLE
                for d in datas):
+            fora_por_evento += 1
+            continue
+        if mexido_na_janela(balanceamento, campeao, antes_de, depois_ate):
+            fora_por_mexida += 1
             continue
         medida = mede(picks, partidas, dias, campeao, dia_do_evento,
                       janela_antes, janela_depois)
         if medida:
             lifts.append(medida["lift"])
             picos.append(medida["lift_do_pico"])
-    return {"lift": sorted(lifts), "pico": sorted(picos)}
+    return {
+        "lift": sorted(lifts),
+        "pico": sorted(picos),
+        "fora_por_evento": fora_por_evento,
+        "fora_por_mexida": fora_por_mexida,
+    }
 
 
 def nome_da_linha(event_id: str) -> str:
@@ -348,6 +402,8 @@ def monta_relatorio(dados: dict) -> str:
             marca_pico = f"p{pos_pico:.0f}" if pos_pico is not None else "-"
             destaque = " *" if (pos_pico is not None
                                 and pos_pico >= PERCENTIL_DE_CORTE) else ""
+            if medida.get("confundido"):
+                destaque += " CONFUNDIDO"
             partes.append(
                 f"  {medida['campeao'][:12]:12s} "
                 f"{medida['taxa_antes']:8.4f} {medida['taxa_depois']:8.4f} "
@@ -376,6 +432,16 @@ def monta_relatorio(dados: dict) -> str:
             partes.append(f"  grupo: {len(subiram)} de "
                           f"{len(com_percentil)} campeoes acima do tipico, "
                           f"chance {chance:.3f} por acaso")
+        primeira = evento["medidas"][0]
+        partes.append(f"  controle: {primeira['controle']} campeoes, "
+                      f"{primeira.get('fora_por_mexida', 0)} tirados por "
+                      "mexida de balanceamento na janela")
+        confundidos = [m for m in evento["medidas"] if m.get("confundido")]
+        if confundidos:
+            nomes = ", ".join(m["campeao"] for m in confundidos)
+            partes.append(f"  [confundido] {nomes} levou mudanca de "
+                          "balanceamento dentro da janela, entao aqui a skin "
+                          "e o balanceamento nao se separam")
         if cruzam:
             partes.append(f"  [ressalva] {len(cruzam)} campeoes com os "
                           "intervalos de 95% se cruzando: a amostra nao "
@@ -493,6 +559,11 @@ def main() -> int:
             date.fromisoformat(linha["event_date"])
         )
 
+    #no modo de teste nao entra balanceamento: o mock nao tem patch nenhum,
+    #e misturar os dois estragaria a comparacao com a forca plantada
+    balanceamento = ({} if argumentos.mock
+                     else le_balanceamento(BALANCEAMENTO))
+
     agrupados: dict[str, list[dict]] = defaultdict(list)
     for linha in eventos:
         agrupados[linha["event_id"]].append(linha)
@@ -511,7 +582,8 @@ def main() -> int:
             if chave not in cache_controle:
                 cache_controle[chave] = controle(
                     picks, partidas, dias, campeoes, dia_do_evento,
-                    argumentos.antes, argumentos.depois, com_evento
+                    argumentos.antes, argumentos.depois, com_evento,
+                    balanceamento
                 )
             referencia = cache_controle[chave]
             medida["percentil"] = percentil(medida["lift"],
@@ -519,6 +591,14 @@ def main() -> int:
             medida["percentil_do_pico"] = percentil(medida["lift_do_pico"],
                                                     referencia["pico"])
             medida["controle"] = len(referencia["lift"])
+            medida["fora_por_mexida"] = referencia["fora_por_mexida"]
+            #o proprio campeao do evento levou mexida dentro da janela?
+            antes_de, _, _, depois_ate = limites_da_janela(
+                dias, dia_do_evento, argumentos.antes, argumentos.depois
+            )
+            medida["confundido"] = mexido_na_janela(
+                balanceamento, linha["champion"], antes_de, depois_ate
+            )
             medidas.append(medida)
         resultados.append({
             "event_id": event_id,

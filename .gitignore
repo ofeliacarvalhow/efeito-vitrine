@@ -1,0 +1,22 @@
+# Segredos
+.env
+
+# Dados brutos: ficam APENAS no computador da Pessoa 1
+data/raw/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Logs
+*.log
+
+# Cache local do Data Dragon
+data/cache_ddragon/
+
+# Sistema
+.DS_Store
+Thumbs.db

@@ -1,0 +1,7 @@
+requests
+pandas
+python-dotenv
+plotly
+streamlit
+# Base de fusos horarios (necessaria no Windows para America/Sao_Paulo)
+tzdata

@@ -67,6 +67,22 @@ SEMENTE_SORTEIO = 20260904
 #a cada quantas partidas sai a linha de progresso
 PROGRESSO_CADA = 100
 
+#Data Dragon. nao e a API da Riot: nao usa chave e nao tem limite de taxa.
+VERSOES_DDRAGON = "https://ddragon.leagueoflegends.com/api/versions.json"
+DDRAGON = "https://ddragon.leagueoflegends.com/cdn"
+IDIOMA_DDRAGON = "pt_BR"
+ESPERA_DDRAGON = 0.05
+
+#patches do periodo. o versions.json numera 16.1 a 16.23, com um build por
+#patch, e nao existe 26.x nenhum. os sete patches abaixo sao os equivalentes
+#aos 26.17 a 26.23 que o plano do projeto pediu.
+PATCHES = ["16.17", "16.18", "16.19", "16.20", "16.21", "16.22", "16.23"]
+
+#patch anterior ao primeiro, baixado so para servir de comparacao e revelar
+#as skins novas do 16.17. nao gera linha propria no CSV.
+PATCH_BASE = "16.16"
+
 BANCO = RAIZ / "data" / "raw" / "coleta.sqlite"
+CACHE_DDRAGON = RAIZ / "data" / "cache_ddragon"
 PARTIDAS = RAIZ / "data" / "raw" / "matches.jsonl"
 ARQUIVO_LOG = RAIZ / "coleta" / "coletar.log"

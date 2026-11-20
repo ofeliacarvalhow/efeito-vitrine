@@ -319,12 +319,16 @@ def formata_duracao(segundos: float) -> str:
     return f"{minutos // 60}h{minutos % 60:02d}"
 
 
-def meta_da_semana(meta: int, inicio: date, fim: date) -> int:
+def proporcional(quantidade: int, inicio: date, fim: date) -> int:
     #fim e exclusivo, entao (fim - inicio).days ja e o numero de dias
     dias = (fim - inicio).days
     if not META_PROPORCIONAL_AOS_DIAS or dias >= 7:
-        return meta
-    return max(1, round(meta * dias / 7))
+        return quantidade
+    return max(1, round(quantidade * dias / 7))
+
+
+def meta_da_semana(meta: int, inicio: date, fim: date) -> int:
+    return proporcional(meta, inicio, fim)
 
 
 def taxa_por_segundo(estado: dict) -> float:
@@ -436,7 +440,11 @@ def coleta(cliente: ClienteRiot, con: sqlite3.Connection,
                     garante_estoque(cliente, con, log, indice, inicio, fim,
                                     alvo, estado)
                 pendentes = conta_ids(con, indice, "pendente")
-                quantas = min(LOTE_POR_SEMANA, meta - baixadas, pendentes)
+                #o lote tambem cai nas janelas de 3 dias, senao elas ficariam
+                #mais densas por dia que as de 7 durante a coleta, e nao so
+                #no fim dela
+                lote = proporcional(LOTE_POR_SEMANA, inicio_dia, fim_dia)
+                quantas = min(lote, meta - baixadas, pendentes)
                 if quantas <= 0:
                     continue
                 if baixa_lote(cliente, con, log, arquivo, indice, quantas,

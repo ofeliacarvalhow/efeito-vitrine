@@ -77,3 +77,40 @@ Não leia `data/raw/`.
 
 Detalhes de responsabilidade, limites da API e regras do projeto estão em
 [`CLAUDE.md`](CLAUDE.md).
+
+<!-- inicio do dicionario de dados -->
+
+## Dicionario de dados
+
+Numeros de 2026-11-20 17:02, fuso America/Sao_Paulo. O `coleta/qualidade.py` reescreve esta secao, entao ela nunca fica velha. O relatorio completo, com partidas dia por dia e versoes do jogo por semana, fica em `data/processed/qualidade.txt`.
+
+### `daily_pickrate.csv`
+
+| coluna | tipo | descricao |
+|---|---|---|
+| `date` | texto `AAAA-MM-DD` | dia no fuso America/Sao_Paulo |
+| `champion` | texto | `championName` da Riot, como `KSante` |
+| `games_total` | inteiro | partidas daquele dia na amostra |
+| `picks` | inteiro | vezes que o campeao foi escolhido no dia |
+| `pick_rate` | decimal | `picks / games_total`, 6 casas |
+
+Estado atual: **13148 linhas**, 76 dias x 173 campeoes, a partir de **2346 partidas** da fila 420. 76 dos 76 dias do periodo tem partida.
+
+Ha uma linha para cada campeao em cada dia do periodo, inclusive dias com zero escolhas. Em dia sem partida nenhuma, `games_total` e `pick_rate` ficam em zero. A lista de campeoes sai dos proprios dados, entao cresce conforme campeoes novos aparecem na coleta.
+
+### `new_skins.csv`
+
+| coluna | tipo | descricao |
+|---|---|---|
+| `version` | texto | patch que trouxe a skin, como `16.18` |
+| `champion` | texto | mesmo nome usado em `daily_pickrate.csv` |
+| `skin_num` | inteiro | numero da skin no Data Dragon, nunca 0 |
+| `skin_name` | texto | nome em pt_BR |
+
+Estado atual: **0 linhas**. O Data Dragon sai dias depois do patch, entao `version` diz qual patch trouxe a skin, nao quando ela saiu. A data oficial do patch entra em `balance_changes.csv`, preenchida pela Pessoa 3.
+
+### Como a amostra foi montada
+
+As partidas vem de jogadores sorteados de IRON a CHALLENGER no BR1, e o periodo e varrido em semanas de segunda a domingo, em rodizio, para a amostra ficar parelha em todos os dias a qualquer momento em que a coleta pare. Isso significa que `games_total` nao e o total de partidas jogadas no servidor naquele dia: e o total que esta na amostra. A taxa de escolha e o que vale comparar entre dias, e nao a contagem bruta.
+
+<!-- fim do dicionario de dados -->

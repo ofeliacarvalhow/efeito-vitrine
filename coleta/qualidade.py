@@ -118,6 +118,25 @@ def le_pickrate() -> dict:
     return {"linhas": linhas, "dias": len(dias), "campeoes": len(campeoes)}
 
 
+def conta_skins() -> tuple[int, int, int]:
+    """Devolve (linhas, lancamentos, campeoes com lancamento)."""
+    if not NOVAS_SKINS.exists():
+        return 0, 0, 0
+    linhas = 0
+    lancamentos = 0
+    campeoes: set[str] = set()
+    with open(NOVAS_SKINS, encoding="utf-8") as arquivo:
+        for registro in csv.DictReader(arquivo):
+            linhas += 1
+            nome = registro["skin_name"]
+            #croma vem como "Nome da Skin (Cor)" e nao e lancamento
+            if nome.endswith(")") and " (" in nome:
+                continue
+            lancamentos += 1
+            campeoes.add(registro["champion"])
+    return linhas, lancamentos, len(campeoes)
+
+
 def conta_linhas_csv(caminho: Path) -> int:
     if not caminho.exists():
         return 0
@@ -255,10 +274,20 @@ def monta_dicionario(bruto: dict, pickrate: dict) -> str:
         "| `skin_num` | inteiro | numero da skin no Data Dragon, nunca 0 |",
         "| `skin_name` | texto | nome em pt_BR |",
         "",
-        f"Estado atual: **{conta_linhas_csv(NOVAS_SKINS)} linhas**. O Data "
-        "Dragon sai dias depois do patch, entao `version` diz qual patch "
-        "trouxe a skin, nao quando ela saiu. A data oficial do patch entra "
-        "em `balance_changes.csv`, preenchida pela Pessoa 3.",
+        f"Estado atual: **{conta_skins()[0]} linhas**, das quais "
+        f"**{conta_skins()[1]} sao lancamento de skin**, em "
+        f"{conta_skins()[2]} campeoes, e o resto sao cromas de skins que ja "
+        "existiam.",
+        "",
+        "**Cuidado ao montar o `events.csv`.** Croma tem nome no formato "
+        "`Nome da Skin (Cor)` e nao e lancamento nenhum. Uma skin com nove "
+        "cromas ocupa dez linhas aqui, e contar as dez como evento faz o "
+        "mesmo lancamento valer dez vezes na analise. Filtre nome com "
+        "parentese.",
+        "",
+        "O Data Dragon sai dias depois do patch, entao `version` diz qual "
+        "patch trouxe a skin, nao quando ela saiu. A data oficial do patch "
+        "entra em `balance_changes.csv`, preenchida pela Pessoa 3.",
         "",
         "### Como a amostra foi montada",
         "",

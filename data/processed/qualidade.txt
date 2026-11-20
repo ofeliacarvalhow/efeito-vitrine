@@ -1,5 +1,5 @@
 RELATORIO DE QUALIDADE DA COLETA
-gerado em 2026-11-20 17:02 (America/Sao_Paulo)
+gerado em 2026-11-20 17:15 (America/Sao_Paulo)
 
 PARTIDAS
   partidas unicas na fila 420: 2346
@@ -113,5 +113,5 @@ VERSOES DO JOGO POR SEMANA
 
 ARQUIVOS ENTREGUES
   daily_pickrate.csv: 13148 linhas, 76 dias x 173 campeoes
-  new_skins.csv:      0 linhas
+  new_skins.csv:      200 linhas
 

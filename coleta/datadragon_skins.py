@@ -132,6 +132,12 @@ def skins_da_versao(sessao: requests.Session,
     return skins
 
 
+def eh_croma(nome: str) -> bool:
+    #croma vem como "Nome da Skin (Cor)", e nao e lancamento de skin nova.
+    #tres cromas da mesma skin contariam como tres eventos na analise.
+    return nome.endswith(")") and " (" in nome
+
+
 def escreve_csv(novas: list[tuple[str, str, int, str]]) -> None:
     SAIDA.parent.mkdir(parents=True, exist_ok=True)
     parcial = SAIDA.parent / (SAIDA.name + ".parcial")
@@ -192,12 +198,22 @@ def main() -> int:
         anterior = atual
 
     escreve_csv(novas)
+    lancamentos = [linha for linha in novas if not eh_croma(linha[3])]
+    cromas = len(novas) - len(lancamentos)
+    campeoes = {linha[1] for linha in lancamentos}
     print("")
     print(f"{SAIDA.relative_to(RAIZ)}: {len(novas)} linhas")
+    print(f"  lancamentos de skin: {len(lancamentos)}, "
+          f"em {len(campeoes)} campeoes")
+    print(f"  cromas de skin que ja existia: {cromas}")
+    print("")
     print(f"comparacao: {PATCH_BASE} entrou so como base do {PATCHES[0]} "
           "e nao gera linha propria.")
     print("a coluna version diz qual patch trouxe a skin. a data oficial do "
           "patch vem de outra fonte, que a Pessoa 3 preenche.")
+    print("ATENCAO para quem montar o events.csv: a maior parte das linhas e "
+          "croma, que nao e lancamento. filtre nome com parentese, senao uma "
+          "skin so conta como varios eventos.")
     return 0
 
 

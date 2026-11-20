@@ -82,7 +82,7 @@ Detalhes de responsabilidade, limites da API e regras do projeto estão em
 
 ## Dicionario de dados
 
-Numeros de 2026-11-20 17:02, fuso America/Sao_Paulo. O `coleta/qualidade.py` reescreve esta secao, entao ela nunca fica velha. O relatorio completo, com partidas dia por dia e versoes do jogo por semana, fica em `data/processed/qualidade.txt`.
+Numeros de 2026-11-20 17:15, fuso America/Sao_Paulo. O `coleta/qualidade.py` reescreve esta secao, entao ela nunca fica velha. O relatorio completo, com partidas dia por dia e versoes do jogo por semana, fica em `data/processed/qualidade.txt`.
 
 ### `daily_pickrate.csv`
 
@@ -107,7 +107,11 @@ Ha uma linha para cada campeao em cada dia do periodo, inclusive dias com zero e
 | `skin_num` | inteiro | numero da skin no Data Dragon, nunca 0 |
 | `skin_name` | texto | nome em pt_BR |
 
-Estado atual: **0 linhas**. O Data Dragon sai dias depois do patch, entao `version` diz qual patch trouxe a skin, nao quando ela saiu. A data oficial do patch entra em `balance_changes.csv`, preenchida pela Pessoa 3.
+Estado atual: **200 linhas**, das quais **30 sao lancamento de skin**, em 27 campeoes, e o resto sao cromas de skins que ja existiam.
+
+**Cuidado ao montar o `events.csv`.** Croma tem nome no formato `Nome da Skin (Cor)` e nao e lancamento nenhum. Uma skin com nove cromas ocupa dez linhas aqui, e contar as dez como evento faz o mesmo lancamento valer dez vezes na analise. Filtre nome com parentese.
+
+O Data Dragon sai dias depois do patch, entao `version` diz qual patch trouxe a skin, nao quando ela saiu. A data oficial do patch entra em `balance_changes.csv`, preenchida pela Pessoa 3.
 
 ### Como a amostra foi montada
 

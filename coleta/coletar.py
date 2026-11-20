@@ -244,7 +244,12 @@ def busca_ids(cliente: ClienteRiot, con: sqlite3.Connection, semana: int,
         return 0, 0
     novos = 0
     for (puuid,) in linhas:
-        ids = riot_api.ids_no_intervalo(cliente, puuid, inicio, fim)
+        try:
+            ids = riot_api.ids_no_intervalo(cliente, puuid, inicio, fim)
+        except riot_api.ErroDaRiot as erro:
+            #esse jogador fica marcado como consultado e a semana segue
+            cliente.aviso(f"[erro] jogador pulado nesta semana: {erro}")
+            ids = []
         if ids:
             antes = con.total_changes
             con.executemany(
@@ -384,10 +389,20 @@ def baixa_lote(cliente: ClienteRiot, con: sqlite3.Connection,
     for (match_id,) in linhas:
         if hora_de_parar(estado):
             break
-        dados = riot_api.partida(cliente, match_id)
-        if dados is None:
+        try:
+            dados = riot_api.partida(cliente, match_id)
+        except riot_api.ErroDaRiot as erro:
+            #a partida fica como erro e a proxima execucao tenta de novo
+            log.info(f"[erro] partida fica para depois: {erro}")
             con.execute(
-                "UPDATE ids SET situacao = 'erro', erro = '404' "
+                "UPDATE ids SET situacao = 'erro', erro = ? "
+                "WHERE match_id = ?", (str(erro)[:200], match_id)
+            )
+            continue
+        if dados is None:
+            #404 nao volta a existir, entao nao tenta de novo nunca
+            con.execute(
+                "UPDATE ids SET situacao = 'ausente', erro = '404' "
                 "WHERE match_id = ?", (match_id,)
             )
             continue
@@ -477,6 +492,16 @@ def main() -> int:
     log.info(f"banco {BANCO}")
     log.info(f"partidas {PARTIDAS}")
     log.info("Ctrl+C encerra sem corromper o arquivo.")
+
+    #o que deu erro numa execucao anterior volta para a fila. o 404 fica como
+    #ausente e nao volta, porque partida apagada nao reaparece.
+    reenfileirados = con.execute(
+        "UPDATE ids SET situacao = 'pendente', erro = NULL "
+        "WHERE situacao = 'erro'"
+    ).rowcount
+    con.commit()
+    if reenfileirados:
+        log.info(f"{reenfileirados} IDs com erro voltaram para a fila")
 
     cota = int(valor(con, "cota_sementes", str(JOGADORES_POR_ELO)))
     if conta_jogadores(con) == 0:

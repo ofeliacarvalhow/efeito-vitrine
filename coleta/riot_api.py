@@ -28,6 +28,18 @@ from config import (
 )
 
 
+#espera maxima entre tentativas quando a rede cai
+ESPERA_MAXIMA_DE_REDE = 60
+
+
+class ErroDaRiot(RuntimeError):
+    """A Riot devolveu 5xx nas tres tentativas.
+
+    Quem chamou decide o que fazer. O coletor marca o item e segue, porque
+    uma partida ruim nao pode derrubar uma coleta de dois dias.
+    """
+
+
 def mapa_limite(texto: str) -> dict[int, int]:
     #le "20:1,100:120" e devolve {1: 20, 120: 100}
     mapa: dict[int, int] = {}
@@ -175,8 +187,15 @@ class ClienteRiot:
             self.aviso("[chave] ainda sem troca, esperando outros 60 segundos.")
 
     def get(self, url: str, parametros: dict | None = None):
-        """Devolve o JSON, ou None em 404. Levanta erro se nao der jeito."""
-        falhas = 0
+        """Devolve o JSON, ou None em 404.
+
+        Queda de rede nao desiste nunca: a coleta leva dois dias e o Wi-Fi
+        cair por um minuto nao pode derrubar o processo. Ja 5xx segue a regra
+        de tres tentativas e levanta ErroDaRiot, que o coletor trata marcando
+        o item e seguindo adiante.
+        """
+        falhas_de_rede = 0
+        falhas_da_riot = 0
         while True:
             self.espera_vaga()
             agora = time.monotonic()
@@ -192,14 +211,19 @@ class ClienteRiot:
                     timeout=20,
                 )
             except requests.RequestException as erro:
-                falhas += 1
-                if falhas > 3:
-                    raise RuntimeError(f"rede falhou 3 vezes em {url}: {erro}")
-                espera = 2 ** falhas
-                self.aviso(f"[rede] {erro.__class__.__name__}, tentativa "
-                           f"{falhas}, esperando {espera}s")
+                falhas_de_rede += 1
+                espera = min(2 ** min(falhas_de_rede, 6),
+                             ESPERA_MAXIMA_DE_REDE)
+                self.aviso(f"[rede] {erro.__class__.__name__} na tentativa "
+                           f"{falhas_de_rede}, esperando {espera}s. o coletor "
+                           "espera a rede voltar, nao desiste")
                 time.sleep(espera)
                 continue
+
+            if falhas_de_rede:
+                self.aviso(f"[rede] voltou depois de {falhas_de_rede} "
+                           "tentativas, seguindo a coleta")
+                falhas_de_rede = 0
 
             self.le_cabecalhos(resposta)
             codigo = resposta.status_code
@@ -217,12 +241,12 @@ class ClienteRiot:
                 self.pausa_ate_trocar_chave()
                 continue
             if 500 <= codigo < 600:
-                falhas += 1
-                if falhas > 3:
-                    raise RuntimeError(f"HTTP {codigo} 3 vezes em {url}")
-                espera = 2 ** falhas
-                self.aviso(f"[{codigo}] erro da Riot, tentativa {falhas}, "
-                           f"esperando {espera}s")
+                falhas_da_riot += 1
+                if falhas_da_riot > 3:
+                    raise ErroDaRiot(f"HTTP {codigo} tres vezes")
+                espera = 2 ** falhas_da_riot
+                self.aviso(f"[{codigo}] erro da Riot, tentativa "
+                           f"{falhas_da_riot}, esperando {espera}s")
                 time.sleep(espera)
                 continue
             raise RuntimeError(f"HTTP {codigo} em {url}: {resposta.text[:300]}")

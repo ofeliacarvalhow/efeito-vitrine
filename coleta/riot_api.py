@@ -70,6 +70,8 @@ class ClienteRiot:
         self.aviso = aviso
         self.chave = self.le_chave(obrigatoria=True)
         self.janelas = [Janela(maximo, segundos) for maximo, segundos in LIMITES]
+        self.por_segundos = {janela.segundos: janela for janela in self.janelas}
+        self.cheias: set[int] = set()
         self.sessao = requests.Session()
         self.requisicoes = 0
         self.marcas_hora: deque[float] = deque()
@@ -95,23 +97,66 @@ class ClienteRiot:
                 return
             time.sleep(espera)
 
-    def respeita_cabecalhos(self, resposta: requests.Response) -> None:
-        #se a Riot diz que a janela encheu, espera a janela inteira
-        pares = (
-            (resposta.headers.get("X-App-Rate-Limit", ""),
-             resposta.headers.get("X-App-Rate-Limit-Count", "")),
-            (resposta.headers.get("X-Method-Rate-Limit", ""),
-             resposta.headers.get("X-Method-Rate-Limit-Count", "")),
+    def aperta_janelas(self, declarados: dict[int, int]) -> None:
+        #vale sempre o limite mais apertado entre o config e o que a Riot diz
+        for segundos, maximo in declarados.items():
+            janela = self.por_segundos.get(segundos)
+            if janela is None:
+                nova = Janela(maximo, segundos)
+                self.janelas.append(nova)
+                self.por_segundos[segundos] = nova
+                self.aviso(f"[limite] a Riot declarou {maximo} por {segundos}s, "
+                           "janela nova no limitador")
+            elif maximo < janela.maximo:
+                self.aviso(f"[limite] a Riot declarou {maximo} por {segundos}s, "
+                           f"abaixo dos {janela.maximo} do config, "
+                           "vale o menor")
+                janela.maximo = maximo
+
+    def le_cabecalhos(self, resposta: requests.Response) -> None:
+        """Le os limites da chave e aperta o limitador local se preciso.
+
+        Nao dorme aqui. O limitador local ja garante no maximo 100
+        requisicoes em QUALQUER intervalo de 120 segundos, e a Riot conta por
+        janela fixa, que e sempre um pedaco de algum intervalo desses, logo a
+        contagem dela nunca estoura. Dormir a janela inteira aqui em cima do
+        limitador custava 150 segundos por lote de 100 em vez de 120. O 429
+        com Retry-After e a rede de seguranca.
+
+        So o X-App-Rate-Limit vale para o limitador, porque e o limite da
+        chave inteira na regiao. O X-Method-Rate-Limit vale por endpoint, e
+        aplicar o de um endpoint em todos freava a coleta sem motivo.
+        """
+        app = mapa_limite(resposta.headers.get("X-App-Rate-Limit", ""))
+        self.aperta_janelas(app)
+        contagens = mapa_limite(
+            resposta.headers.get("X-App-Rate-Limit-Count", "")
         )
-        for texto_limite, texto_contagem in pares:
-            limites = mapa_limite(texto_limite)
-            contagens = mapa_limite(texto_contagem)
-            for segundos, maximo in limites.items():
-                if contagens.get(segundos, 0) >= maximo:
-                    self.aviso(f"[limite] {texto_contagem} de {texto_limite}, "
-                               f"esperando {segundos}s")
-                    time.sleep(segundos + 1)
-                    return
+        for segundos, maximo in app.items():
+            cheia = contagens.get(segundos, 0) >= maximo
+            if cheia and segundos not in self.cheias:
+                self.cheias.add(segundos)
+                self.aviso(f"[limite] a janela de {segundos}s encheu com "
+                           f"{contagens.get(segundos, 0)} de {maximo}, "
+                           "o limitador local segura o ritmo")
+            elif not cheia:
+                self.cheias.discard(segundos)
+        limite_metodo = mapa_limite(
+            resposta.headers.get("X-Method-Rate-Limit", "")
+        )
+        conta_metodo = mapa_limite(
+            resposta.headers.get("X-Method-Rate-Limit-Count", "")
+        )
+        for segundos, maximo in limite_metodo.items():
+            chave = -segundos
+            cheia = conta_metodo.get(segundos, 0) >= maximo
+            if cheia and chave not in self.cheias:
+                self.cheias.add(chave)
+                self.aviso(f"[limite] o endpoint encheu a janela de "
+                           f"{segundos}s com {maximo}, o 429 avisa se a Riot "
+                           "cobrar")
+            elif not cheia:
+                self.cheias.discard(chave)
 
     def pausa_ate_trocar_chave(self) -> None:
         antiga = self.chave
@@ -156,7 +201,7 @@ class ClienteRiot:
                 time.sleep(espera)
                 continue
 
-            self.respeita_cabecalhos(resposta)
+            self.le_cabecalhos(resposta)
             codigo = resposta.status_code
 
             if codigo == 200:

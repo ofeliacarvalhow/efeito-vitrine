@@ -14,6 +14,9 @@ venv/
 # Logs
 *.log
 
+# Cache local das buscas no YouTube
+data/cache_youtube/
+
 # Cache local do Data Dragon
 data/cache_ddragon/
 

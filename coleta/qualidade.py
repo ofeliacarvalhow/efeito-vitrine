@@ -32,6 +32,7 @@ from config import (
 )
 
 SAIDA = RAIZ / "data" / "processed" / "qualidade.txt"
+DATAS_PATCHES = RAIZ / "data" / "processed" / "patch_dates.csv"
 PICKRATE = RAIZ / "data" / "processed" / "daily_pickrate.csv"
 NOVAS_SKINS = RAIZ / "data" / "processed" / "new_skins.csv"
 LEIAME = RAIZ / "README.md"
@@ -189,6 +190,35 @@ def conta_linhas_csv(caminho: Path) -> int:
         return 0
     with open(caminho, encoding="utf-8") as arquivo:
         return max(0, sum(1 for _ in arquivo) - 1)
+
+
+def escreve_datas_dos_patches(patches: list[dict],
+                              partidas_do_patch: Counter) -> None:
+    """Grava as datas medidas num CSV, para o eventos/ usar sem reparsear.
+
+    Nao faz parte do contrato de dados. E um arquivo derivado, que sai do
+    gameVersion das partidas coletadas, para quem monta o events.csv e o
+    balance_changes.csv nao precisar ler o relatorio de texto.
+
+    Em patch sem dia de virada capturado, patch_date leva o limite de cima,
+    que e o primeiro dia em que a versao aparece, e exata fica em 0.
+    """
+    DATAS_PATCHES.parent.mkdir(parents=True, exist_ok=True)
+    parcial = DATAS_PATCHES.parent / (DATAS_PATCHES.name + ".parcial")
+    with open(parcial, "w", encoding="utf-8", newline="") as arquivo:
+        escritor = csv.writer(arquivo)
+        escritor.writerow(
+            ["patch", "patch_date", "exata", "intervalo_de", "partidas"]
+        )
+        for item in patches:
+            escritor.writerow([
+                item["patch"],
+                item["ate"].isoformat(),
+                1 if item["exata"] else 0,
+                item["de"].isoformat() if item["de"] else "",
+                partidas_do_patch.get(item["patch"], 0),
+            ])
+    os.replace(parcial, DATAS_PATCHES)
 
 
 def monta_relatorio(bruto: dict, janelas: list[tuple[date, date]],
@@ -428,11 +458,17 @@ def main() -> int:
     parcial.write_text(relatorio, encoding="utf-8")
     os.replace(parcial, SAIDA)
 
+    patches = datas_dos_patches(bruto["dias_do_patch"])
+    escreve_datas_dos_patches(patches, bruto["partidas_do_patch"])
+
     acao = atualiza_leiame(monta_dicionario(bruto, pickrate))
 
     contagens = bruto["contagens"]
+    exatas = sum(1 for item in patches if item["exata"])
     print(f"{SAIDA.relative_to(RAIZ)}: "
           f"{len(relatorio.splitlines())} linhas")
+    print(f"{DATAS_PATCHES.relative_to(RAIZ)}: {len(patches)} patches, "
+          f"{exatas} com data exata")
     print(f"{LEIAME.relative_to(RAIZ)}: dicionario de dados, {acao}")
     print("")
     print(f"partidas unicas: {contagens['validas']} | "

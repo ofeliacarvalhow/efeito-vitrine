@@ -1,0 +1,44 @@
+patch,patch_date,champion,change
+16.17,2026-09-04,AurelionSol,Q custo 35/40/45/50/55 para 30/35/40/45/50; W cooldown 22/20.5/19/17.5/16 para 22/20/18/16/14
+16.17,2026-09-04,Leblanc,attackspeedperlevel 2.35 para 1.5
+16.17,2026-09-04,Nocturne,armor 38 para 36; hp 655 para 640
+16.17,2026-09-04,Vayne,attackspeedperlevel 3.3 para 2.8; hp 550 para 580; hpperlevel 103 para 98; hpregen 3.5 para 4; hpregenperlevel 0.55 para 0.5; Q custo 30 para 46/42/38/34/30
+16.17,2026-09-04,Xerath,hp 596 para 575; Q efeito 1 75/115/155/195/235 para 70/110/150/190/230
+16.18,2026-09-10,Bard,armor 34 para 32; armorperlevel 5 para 4.7
+16.18,2026-09-10,Cassiopeia,Q efeito 1 75/110/145/180/215 para 65/100/135/170/205; E custo 40 para 45
+16.18,2026-09-10,Ekko,Q custo 50/60/70/80/90 para 40/50/60/70/80
+16.18,2026-09-10,MasterYi,armorperlevel 4.5 para 5
+16.18,2026-09-10,Nautilus,attackdamage 61 para 58
+16.18,2026-09-10,Seraphine,E cooldown 11/10.5/10/9.5/9 para 11
+16.18,2026-09-10,Syndra,W cooldown 12/11/10/9/8 para 13/12/11/10/9
+16.19,2026-09-23,Aatrox,W cooldown 20/18/16/14/12 para 18/16.5/15/13.5/12
+16.19,2026-09-23,Draven,attackdamage 62 para 64
+16.19,2026-09-23,Elise,R efeito 2 12/22/32/42 para 14/24/34/44
+16.19,2026-09-23,Fiora,hpperlevel 99 para 105
+16.19,2026-09-23,Khazix,W efeito 4 2 para 2.25; W efeito 6 2 para 2.25
+16.19,2026-09-23,Lillia,armor 22 para 24
+16.19,2026-09-23,Nocturne,R cooldown 140/115/90 para 160/130/100
+16.19,2026-09-23,Ryze,armorperlevel 4.2 para 4.7; E custo 35/45/55/65/75 para 40/50/60/70/80
+16.19,2026-09-23,Vi,attackdamage 63 para 61
+16.20,2026-10-07,Cassiopeia,hp 630 para 610; mp 480 para 450
+16.20,2026-10-07,KSante,W custo 40/45/50/55/60 para 45/50/55/60/65
+16.20,2026-10-07,Mordekaiser,R cooldown 140/120/100 para 120/110/100
+16.20,2026-10-07,Swain,armor 25 para 23; spellblock 31 para 34; W cooldown 22/21/20/19/18 para 20/19/18/17/16
+16.20,2026-10-07,Vayne,hpregen 4 para 5.5; hpregenperlevel 0.5 para 0.4; Q custo 46/42/38/34/30 para 30
+16.21,2026-10-21,Azir,mpperlevel 40 para 50
+16.21,2026-10-21,Darius,Q cooldown 9/8/7/6/5 para 9/7.75/6.5/5.25/4
+16.21,2026-10-21,Jinx,hp 630 para 610
+16.21,2026-10-21,LeeSin,W cooldown 7 para 8
+16.21,2026-10-21,Locke,mpperlevel 70 para 60; W custo 50/55/60/65/70 para 60/65/70/75/80
+16.21,2026-10-21,MonkeyKing,hpregen 3.5 para 5.5
+16.21,2026-10-21,Sion,hpperlevel 87 para 95
+16.21,2026-10-21,Viktor,movespeed 335 para 330
+16.22,2026-11-04,Kayle,Q cooldown 12/11/10/9/8 para 10/9.5/9/8.5/8; R cooldown 160/120/80 para 140/110/80
+16.22,2026-11-04,Mel,armorperlevel 5.2 para 5.4; attackdamage 54 para 52; attackspeedperlevel 2.5 para 2.75; hp 630 para 590; hpperlevel 99 para 107; mp 480 para 455; e mais 6 mudanca(s)
+16.22,2026-11-04,Thresh,attackdamage 56 para 54; R efeito 1 250/400/550 para 0
+16.22,2026-11-04,Viktor,hpperlevel 100 para 105
+16.22,2026-11-04,Zaahen,Q cooldown 10/9/8/7/6 para 8/7.5/7/6.5/6
+16.23,2026-11-18,Azir,attackrange 525 para 550
+16.23,2026-11-18,KSante,W custo 45/50/55/60/65 para 45
+16.23,2026-11-18,Syndra,E cooldown 15 para 17/16.5/16/15.5/15; E custo 50 para 60
+16.23,2026-11-18,Velkoz,R efeito 1 450/700/925 para 450/700/950

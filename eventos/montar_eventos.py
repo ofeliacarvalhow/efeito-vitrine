@@ -288,6 +288,10 @@ def main() -> int:
 
     eventos: list[dict] = []
     fora: list[str] = []
+    #uma skin por campeao por data. se ele pegou duas no mesmo patch, e um
+    #momento so, com os dois nomes no titulo.
+    de_skin: dict[tuple, dict] = {}
+    juntos: list[str] = []
     for (versao, linha), itens in sorted(grupos.items()):
         registro = datas.get(versao) or {}
         data = registro.get("patch_date", "")
@@ -300,15 +304,37 @@ def main() -> int:
             continue
         identificador = f"skin-{versao}-{slug(linha)}"
         for item in sorted(itens, key=lambda i: i["champion"]):
-            eventos.append({
-                "event_id": identificador,
-                "champion": item["champion"],
-                "event_type": "skin",
-                "event_date": data,
-                "title": item["skin_name"],
-                "youtube_id": "",
-                "views": "",
-            })
+            chave = (item["champion"], data)
+            anterior = de_skin.get(chave)
+            if anterior is None:
+                de_skin[chave] = {
+                    "event_id": identificador,
+                    "champion": item["champion"],
+                    "event_type": "skin",
+                    "event_date": data,
+                    "title": item["skin_name"],
+                    "youtube_id": "",
+                    "views": "",
+                    "quantas_linhas": len(itens),
+                }
+                continue
+            #duas skins do mesmo campeao no mesmo patch sao um momento so.
+            #a Evelynn pegou K/DA FIRESTARTER e K/DA Hitmaker no 16.22, e a
+            #Tristana pegou Lenda Ascendida e Lenda Imortalizada no 16.18.
+            #virava a mesma medida contada duas vezes.
+            juntos.append(f"{item['champion']} em {data}")
+            anterior["title"] = f"{anterior['title']} + {item['skin_name']}"
+            if len(itens) > anterior["quantas_linhas"]:
+                anterior["event_id"] = identificador
+                anterior["quantas_linhas"] = len(itens)
+    for registro in de_skin.values():
+        registro.pop("quantas_linhas", None)
+        eventos.append(registro)
+    if juntos:
+        print(f"[juntado] {len(juntos)} campeoes ganharam duas skins no "
+              "mesmo patch e viraram um evento so: "
+              f"{', '.join(juntos)}")
+        print("")
     if fora:
         print(f"[fora] {len(fora)} linhas de skin nao entraram, porque o "
               "patch delas ja estava no ar quando o periodo comecou e nao "

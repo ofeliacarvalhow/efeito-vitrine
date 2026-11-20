@@ -619,6 +619,32 @@ def monta_relatorio(dados: dict) -> str:
         partes.append(f"  {tipo:12s} {acima:7d} {len(medidas):5d} "
                       f"{chance:8.3f}")
     partes.append("")
+    #clipe e trailer do mesmo lancamento saem com poucos dias de diferenca,
+    #entao medem quase o mesmo pedaco da serie. dizer isso importa: as
+    #linhas de um tipo nao sao evidencia independente das do outro.
+    momentos: dict[str, list[tuple[date, str]]] = {}
+    for evento in dados["resultados"]:
+        quando = date.fromisoformat(evento["event_date"])
+        for medida in evento["medidas"]:
+            momentos.setdefault(medida["campeao"], []).append(
+                (quando, evento["event_type"])
+            )
+    sobrepostos: dict[str, int] = {}
+    for lista in momentos.values():
+        for quando, tipo in lista:
+            if any(outro != tipo and abs((quando - data).days)
+                   <= dados["depois"] for data, outro in lista):
+                sobrepostos[tipo] = sobrepostos.get(tipo, 0) + 1
+    if sobrepostos:
+        detalhe = ", ".join(f"{tipo} {n}" for tipo, n in
+                            sorted(sobrepostos.items()))
+        partes.append(f"  CUIDADO: {detalhe} linhas tem evento de OUTRO tipo")
+        partes.append("  do mesmo campeao dentro da janela. clipe e trailer")
+        partes.append("  do mesmo lancamento saem com dois a quatro dias de")
+        partes.append("  diferenca e medem quase o mesmo pedaco da serie,")
+        partes.append("  entao as linhas desses tipos nao sao evidencia")
+        partes.append("  independente uma da outra.")
+        partes.append("")
     partes.append("  chance e a probabilidade de ver esse tanto de campeoes")
     partes.append("  acima do tipico, ou mais, se o evento nao fizesse nada.")
     partes.append("  abaixo de 0.05 comeca a valer conversa, e com quatro")

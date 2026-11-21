@@ -105,7 +105,7 @@ Detalhes de responsabilidade, limites da API e regras do projeto estão em
 
 ## Dicionario de dados
 
-Numeros de 2026-11-21 11:59, fuso America/Sao_Paulo. O `coleta/qualidade.py` reescreve esta secao, entao ela nunca fica velha. O relatorio completo, com partidas dia por dia e versoes do jogo por semana, fica em `data/processed/qualidade.txt`.
+Numeros de 2026-11-21 14:16, fuso America/Sao_Paulo. O `coleta/qualidade.py` reescreve esta secao, entao ela nunca fica velha. O relatorio completo, com partidas dia por dia e versoes do jogo por semana, fica em `data/processed/qualidade.txt`.
 
 ### `daily_pickrate.csv`
 
@@ -117,7 +117,7 @@ Numeros de 2026-11-21 11:59, fuso America/Sao_Paulo. O `coleta/qualidade.py` ree
 | `picks` | inteiro | vezes que o campeao foi escolhido no dia |
 | `pick_rate` | decimal | `picks / games_total`, 6 casas |
 
-Estado atual: **13148 linhas**, 76 dias x 173 campeoes, a partir de **23179 partidas** da fila 420. 76 dos 76 dias do periodo tem partida.
+Estado atual: **46364 linhas**, 268 dias x 173 campeoes, a partir de **27173 partidas** da fila 420. 268 dos 268 dias do periodo tem partida.
 
 Ha uma linha para cada campeao em cada dia do periodo, inclusive dias com zero escolhas. Em dia sem partida nenhuma, `games_total` e `pick_rate` ficam em zero. A lista de campeoes sai dos proprios dados, entao cresce conforme campeoes novos aparecem na coleta.
 
@@ -130,7 +130,7 @@ Ha uma linha para cada campeao em cada dia do periodo, inclusive dias com zero e
 | `skin_num` | inteiro | numero da skin no Data Dragon, nunca 0 |
 | `skin_name` | texto | nome em pt_BR |
 
-Estado atual: **200 linhas**, das quais **30 sao lancamento de skin**, em 27 campeoes, e o resto sao cromas de skins que ja existiam.
+Estado atual: **97 linhas**, das quais **97 sao lancamento de skin**, em 86 campeoes, e o resto sao cromas de skins que ja existiam.
 
 **Cuidado ao montar o `events.csv`.** Croma tem nome no formato `Nome da Skin (Cor)` e nao e lancamento nenhum. Uma skin com nove cromas ocupa dez linhas aqui, e contar as dez como evento faz o mesmo lancamento valer dez vezes na analise. Filtre nome com parentese.
 

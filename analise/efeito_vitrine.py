@@ -481,6 +481,17 @@ def bloco_do_placebo(dados: dict) -> str:
     partes.append(f"  sorteios que empataram ou passaram o real: "
                   f"{tantos} de {len(contagens)}, ou seja {chance:.3f}")
     partes.append("")
+    magros = dados["magros_marcados"]
+    pares = dados["pares_de_verdade"]
+    if pares:
+        partes.append(f"  CUIDADO: {magros} dos {pares} pares marcados vem "
+                      f"de campeao com menos de {PICKS_MINIMOS} escolhas na")
+        partes.append("  janela de antes. em campeao pouco escolhido, meia")
+        partes.append("  duzia de escolhas a mais ja vira lift de duas vezes,")
+        partes.append("  entao esse resultado esta pendurado nos numeros mais")
+        partes.append("  ruidosos da amostra. compare com os testes por tipo,")
+        partes.append("  logo abaixo: se eles nao acompanham, nao conclua.")
+        partes.append("")
     if chance > 0.10:
         partes.append("  leitura: o resultado real cabe tranquilamente no "
                       "que o acaso")
@@ -808,12 +819,14 @@ def main() -> int:
             "medidas": medidas,
         })
 
-    marcados_de_verdade = [
-        (m["campeao"], date.fromisoformat(e["event_date"]))
+    marcas = [
+        (m["campeao"], date.fromisoformat(e["event_date"]), m["picks_antes"])
         for e in resultados for m in e["medidas"]
         if m["percentil_do_pico"] is not None
         and m["percentil_do_pico"] >= PERCENTIL_DE_CORTE
     ]
+    marcados_de_verdade = [(c, d) for c, d, _ in marcas]
+    magros_marcados = sum(1 for _, _, n in marcas if n < PICKS_MINIMOS)
     pares_de_verdade = len(marcados_de_verdade)
     acima_de_verdade = destaques_distintos(marcados_de_verdade,
                                            argumentos.depois)
@@ -836,6 +849,7 @@ def main() -> int:
         "placebo": contagens_do_placebo,
         "acima_de_verdade": acima_de_verdade,
         "pares_de_verdade": pares_de_verdade,
+        "magros_marcados": magros_marcados,
         "antes": argumentos.antes,
         "depois": argumentos.depois,
         "picks": picks,

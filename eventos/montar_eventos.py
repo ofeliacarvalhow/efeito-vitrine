@@ -35,6 +35,7 @@ ARQUIVO_ENV = RAIZ / ".env"
 NOVAS_SKINS = RAIZ / "data" / "processed" / "new_skins.csv"
 DATAS_PATCHES = RAIZ / "data" / "processed" / "patch_dates.csv"
 CACHE = RAIZ / "data" / "cache_youtube"
+MANUAIS = Path(__file__).resolve().parent / "eventos_manuais.csv"
 SAIDA = RAIZ / "data" / "processed" / "events.csv"
 
 FUSO = ZoneInfo("America/Sao_Paulo")
@@ -139,6 +140,20 @@ def junta_linhas_estendidas(grupos: dict) -> dict:
             final = destino[final]
         novos.setdefault(final, []).extend(itens)
     return novos
+
+
+def le_manuais() -> list[dict]:
+    """Eventos escritos a mao, que nenhuma regra automatica acha.
+
+    O teaser de Nova Alvorada mostra dezesseis campeoes e nao cita nenhum no
+    titulo, entao so quem assistiu sabe quem aparece. A coluna fonte guarda
+    de onde veio a informacao, porque essa parte nao e medida: e alguem
+    olhando o video. Quem for usar o events.csv merece saber a diferenca.
+    """
+    if not MANUAIS.exists():
+        return []
+    with open(MANUAIS, encoding="utf-8") as arquivo:
+        return list(csv.DictReader(arquivo))
 
 
 def le_datas_dos_patches() -> dict[str, dict]:
@@ -453,6 +468,32 @@ def main() -> int:
                 "youtube_id": video["youtube_id"],
                 "views": vistas.get(video["youtube_id"], ""),
             })
+
+    manuais = le_manuais()
+    if manuais:
+        ids_manuais = sorted({l["youtube_id"] for l in manuais
+                              if l["youtube_id"]})
+        vistas_manuais = youtube.visualizacoes(ids_manuais)
+        por_evento: dict[str, int] = {}
+        for linha in manuais:
+            eventos.append({
+                "event_id": linha["event_id"],
+                "champion": linha["champion"],
+                "event_type": linha["event_type"],
+                "event_date": linha["event_date"],
+                "title": linha["title"],
+                "youtube_id": linha["youtube_id"],
+                "views": vistas_manuais.get(linha["youtube_id"], ""),
+            })
+            por_evento[linha["event_id"]] =                 por_evento.get(linha["event_id"], 0) + 1
+        print("")
+        print(f"  [a mao] {MANUAIS.name}: {len(por_evento)} eventos, "
+              f"{len(manuais)} linhas")
+        for identificador, quantos in sorted(por_evento.items()):
+            fonte = next(l["fonte"] for l in manuais
+                         if l["event_id"] == identificador)
+            print(f"      {identificador}: {quantos} campeoes")
+            print(f"      fonte: {fonte}")
 
     escreve_csv(eventos)
     print("")

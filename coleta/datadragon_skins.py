@@ -32,6 +32,7 @@ from config import (
     IDIOMA_DDRAGON,
     PATCH_BASE,
     PATCHES,
+    PATCHES_SUSPEITOS,
     RAIZ,
     VERSOES_DDRAGON,
 )
@@ -87,6 +88,11 @@ def baixa_json(sessao: requests.Session, url: str, cache: Path,
     return None
 
 
+def eh_croma(nome: str) -> bool:
+    #croma vem como "Nome da Skin (Cor)", e nao e lancamento de skin nova
+    return nome.endswith(")") and " (" in nome
+
+
 def versao_do_patch(versoes: list[str], patch: str) -> str | None:
     #versions.json vem da mais nova para a mais velha, entao a primeira que
     #casar com o patch e o build mais novo dele
@@ -97,8 +103,13 @@ def versao_do_patch(versoes: list[str], patch: str) -> str | None:
 
 
 def skins_da_versao(sessao: requests.Session,
-                    versao: str) -> dict[str, dict[int, str]] | None:
-    """{campeao: {numero: nome}} de uma versao. Pula a skin 0, a padrao."""
+                    versao: str) -> dict[str, dict[str, int]] | None:
+    """{campeao: {nome: numero}} de uma versao. Pula a skin 0, a padrao.
+
+    A chave e o NOME e nao o numero, porque numero nao e estavel: quando os
+    cromas entraram na lista, no 16.6, as skins antigas foram renumeradas e
+    62 delas apareceram como novas so por isso. Nome de skin nao muda.
+    """
     pasta = CACHE_DDRAGON / versao
     lista = baixa_json(
         sessao,
@@ -107,7 +118,17 @@ def skins_da_versao(sessao: requests.Session,
     )
     if lista is None:
         return None
-    identificadores = sorted((lista.get("data") or {}).keys())
+    #o Data Dragon traz entradas que nao sao campeao do jogo normal. o patch
+    #16.15 metou 60 delas com prefixo Jade_, que renderam 1464 skins falsas.
+    #campeao de verdade nunca tem sublinhado no id: KSante, Kaisa, LeeSin,
+    #MonkeyKing. filtrar por isso tira o lixo sem lista fixa para manter.
+    identificadores = sorted(
+        i for i in (lista.get("data") or {}).keys() if "_" not in i
+    )
+    descartados = len(lista.get("data") or {}) - len(identificadores)
+    if descartados:
+        print(f"  {versao}: {descartados} entradas com sublinhado no id "
+              "descartadas, nao sao campeao do jogo")
     skins: dict[str, dict[int, str]] = {}
     for identificador in identificadores:
         dados = baixa_json(
@@ -125,17 +146,19 @@ def skins_da_versao(sessao: requests.Session,
                 numero = int(skin.get("num", -1))
             except (TypeError, ValueError):
                 continue
+            nome = skin.get("name") or ""
             #a skin 0 e a aparencia padrao, nao e lancamento
-            if numero > 0:
-                do_campeao[numero] = skin.get("name") or ""
+            if numero <= 0:
+                continue
+            #croma fora daqui, nao so do resultado. o Data Dragon so comecou
+            #a listar croma no 16.6: antes dele sao 11 skins por campeao e
+            #depois sao 50. comparar as duas formas daria 6717 skins falsas
+            #num patch so, que e mudanca de formato e nao lancamento.
+            if eh_croma(nome):
+                continue
+            do_campeao[nome] = numero
         skins[identificador] = do_campeao
     return skins
-
-
-def eh_croma(nome: str) -> bool:
-    #croma vem como "Nome da Skin (Cor)", e nao e lancamento de skin nova.
-    #tres cromas da mesma skin contariam como tres eventos na analise.
-    return nome.endswith(")") and " (" in nome
 
 
 def escreve_csv(novas: list[tuple[str, str, int, str]]) -> None:
@@ -185,11 +208,17 @@ def main() -> int:
             antes = anterior.get(campeao)
             if antes is None:
                 campeoes_novos.append(campeao)
-            for numero in sorted(atual[campeao]):
-                if antes is None or numero not in antes:
+            for nome in sorted(atual[campeao],
+                               key=lambda n: atual[campeao][n]):
+                if antes is None or nome not in antes:
                     do_patch.append(
-                        (patch, campeao, numero, atual[campeao][numero])
+                        (patch, campeao, atual[campeao][nome], nome)
                     )
+        if patch in PATCHES_SUSPEITOS:
+            print(f"{patch}: {len(do_patch)} diferencas DESCARTADAS, patch "
+                  "marcado como fonte nao confiavel no config")
+            anterior = atual
+            continue
         novas.extend(do_patch)
         recado = f"{patch}: {len(do_patch)} skins novas"
         if campeoes_novos:
@@ -211,9 +240,9 @@ def main() -> int:
           "e nao gera linha propria.")
     print("a coluna version diz qual patch trouxe a skin. a data oficial do "
           "patch vem de outra fonte, que a Pessoa 3 preenche.")
-    print("ATENCAO para quem montar o events.csv: a maior parte das linhas e "
-          "croma, que nao e lancamento. filtre nome com parentese, senao uma "
-          "skin so conta como varios eventos.")
+    print("croma nao entra neste arquivo: ele e descartado na comparacao, "
+          "nao so no resultado, porque o Data Dragon so comecou a listar "
+          "croma no 16.6 e isso criaria 6717 skins falsas naquele patch.")
     return 0
 
 

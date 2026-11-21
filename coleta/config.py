@@ -89,6 +89,13 @@ PATCHES = ["16.3", "16.4", "16.5", "16.6", "16.7", "16.8", "16.9",
 #as skins novas do primeiro. nao gera linha propria no CSV.
 PATCH_BASE = "16.2"
 
+#patches cujo diff nao e confiavel e que por isso nao geram evento, embora
+#continuem na cadeia de comparacao para nao jogar a diferenca no patch
+#seguinte. o 16.6 e o ponto em que o Data Dragon mudou de conteudo: ele
+#passou a listar croma, de 11 para 50 skins por campeao, e junto apareceram
+#62 skins base que ninguem lancou num patch so.
+PATCHES_SUSPEITOS = ["16.6"]
+
 BANCO = RAIZ / "data" / "raw" / "coleta.sqlite"
 #trava de instancia unica. o sistema solta sozinho quando o processo morre,
 #inclusive em queda de energia, entao nao sobra trava velha.

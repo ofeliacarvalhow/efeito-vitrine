@@ -229,10 +229,18 @@ def pico(tabela, campeao: str, de: date, ate: date,
 
 
 def limites_da_janela(dias, dia_do_evento: date, janela_antes: int,
-                      janela_depois: int):
-    #recorta no periodo que existe, em vez de descartar o evento inteiro
-    antes_de = max(dias[0], dia_do_evento - timedelta(days=janela_antes))
-    antes_ate = dia_do_evento - timedelta(days=1)
+                      janela_depois: int, recuo: int = 0):
+    """Limites das duas janelas, recortados no periodo que existe.
+
+    `recuo` afasta a janela de antes do evento. Serve para um problema real:
+    skin fica no PBE umas duas semanas antes de entrar no jogo, entao a
+    janela colada no lancamento mede uma base que ja viu a skin, e o metodo
+    subestima. Com recuo de 14 a base vai para os dias -28 a -15, antes do
+    PBE. O custo e perder evento perto do inicio do periodo.
+    """
+    antes_de = max(dias[0],
+                   dia_do_evento - timedelta(days=janela_antes + recuo))
+    antes_ate = dia_do_evento - timedelta(days=1 + recuo)
     depois_de = dia_do_evento
     depois_ate = min(dias[-1],
                      dia_do_evento + timedelta(days=janela_depois - 1))
@@ -240,9 +248,10 @@ def limites_da_janela(dias, dia_do_evento: date, janela_antes: int,
 
 
 def mede(tabela, campeao: str, dia_do_evento: date,
-         janela_antes: int, janela_depois: int) -> dict | None:
+         janela_antes: int, janela_depois: int,
+         recuo: int = 0) -> dict | None:
     antes_de, antes_ate, depois_de, depois_ate = limites_da_janela(
-        tabela["dias"], dia_do_evento, janela_antes, janela_depois
+        tabela["dias"], dia_do_evento, janela_antes, janela_depois, recuo
     )
     dias_antes = (antes_ate - antes_de).days + 1
     dias_depois = (depois_ate - depois_de).days + 1
@@ -283,7 +292,8 @@ def mexido_na_janela(balanceamento: dict[str, list[date]], campeao: str,
 def controle(tabela, campeoes, dia_do_evento: date,
              janela_antes: int, janela_depois: int,
              com_evento: dict[str, list[date]],
-             balanceamento: dict[str, list[date]]) -> dict:
+             balanceamento: dict[str, list[date]],
+             recuo: int = 0) -> dict:
     """Lift dos campeoes sem evento e sem mexida perto desta data.
 
     Tira do controle quem foi buffado ou nerfado dentro da janela, porque
@@ -291,7 +301,7 @@ def controle(tabela, campeoes, dia_do_evento: date,
     nada fez ali. Mexida de dois meses antes nao atrapalha e fica.
     """
     antes_de, _, _, depois_ate = limites_da_janela(
-        tabela["dias"], dia_do_evento, janela_antes, janela_depois
+        tabela["dias"], dia_do_evento, janela_antes, janela_depois, recuo
     )
     lifts: list[float] = []
     picos: list[float] = []
@@ -307,7 +317,7 @@ def controle(tabela, campeoes, dia_do_evento: date,
             fora_por_mexida += 1
             continue
         medida = mede(tabela, campeao, dia_do_evento,
-                      janela_antes, janela_depois)
+                      janela_antes, janela_depois, recuo)
         if medida:
             lifts.append(medida["lift"])
             picos.append(medida["lift_do_pico"])
@@ -345,7 +355,7 @@ def destaques_distintos(pares: list[tuple[str, date]], janela: int) -> int:
 def placebo(tabela, campeoes, eventos_reais: list[tuple[str, list[str]]],
             janela_antes: int, janela_depois: int,
             balanceamento: dict[str, list[date]], repeticoes: int,
-            semente: int) -> list[int]:
+            semente: int, recuo: int = 0) -> list[int]:
     """Repete a medida inteira com datas de evento sorteadas.
 
     Serve para responder a pergunta que derruba qualquer analise de antes e
@@ -378,13 +388,13 @@ def placebo(tabela, campeoes, eventos_reais: list[tuple[str, list[str]]],
         for (_, nomes), quando in zip(eventos_reais, datas_falsas):
             for campeao in nomes:
                 medida = mede(tabela, campeao, quando, janela_antes,
-                              janela_depois)
+                              janela_depois, recuo)
                 if not medida:
                     continue
                 if quando not in cache:
                     cache[quando] = controle(
                         tabela, campeoes, quando, janela_antes,
-                        janela_depois, com_evento, balanceamento
+                        janela_depois, com_evento, balanceamento, recuo
                     )
                 posicao = percentil(medida["lift_do_pico"],
                                     cache[quando]["pico"])
@@ -512,8 +522,14 @@ def monta_relatorio(dados: dict) -> str:
     partes: list[str] = []
     partes.append("EFEITO VITRINE: ANTES E DEPOIS")
     partes.append(f"fonte: {dados['fonte']}")
-    partes.append(f"janela: {dados['antes']} dias antes e "
-                  f"{dados['depois']} dias depois da data do evento")
+    recuo = dados.get("recuo", 0)
+    if recuo:
+        partes.append(f"janela: base nos dias -{dados['antes'] + recuo} a "
+                      f"-{recuo + 1}, afastada {recuo} dias para escapar do "
+                      f"PBE, e {dados['depois']} dias depois do evento")
+    else:
+        partes.append(f"janela: {dados['antes']} dias antes e "
+                      f"{dados['depois']} dias depois da data do evento")
     partes.append(f"periodo do dado: {dados['dias'][0]} a {dados['dias'][-1]}")
     media = sum(dados["partidas"].values()) / len(dados["dias"])
     partes.append(f"partidas por dia na amostra: media {media:.0f}")
@@ -745,6 +761,9 @@ def main() -> int:
                             help="dias da janela depois do evento")
     analisador.add_argument("--placebo", type=int, default=REPETICOES_PLACEBO,
                             help="repeticoes do teste de placebo, 0 desliga")
+    analisador.add_argument("--recuo", type=int, default=0,
+                            help="afasta a janela de antes, para escapar do "
+                                 "PBE. 14 poe a base nos dias -28 a -15")
     argumentos = analisador.parse_args()
 
     fonte = MOCK if argumentos.mock else REAL
@@ -784,16 +803,18 @@ def main() -> int:
         dia_do_evento = date.fromisoformat(linhas[0]["event_date"])
         medidas = []
         for linha in sorted(linhas, key=lambda l: l["champion"]):
-            medida = mede(tabela, linha["champion"],
-                          dia_do_evento, argumentos.antes, argumentos.depois)
+            medida = mede(tabela, linha["champion"], dia_do_evento,
+                          argumentos.antes, argumentos.depois,
+                          argumentos.recuo)
             if not medida:
                 continue
-            chave = (dia_do_evento, argumentos.antes, argumentos.depois)
+            chave = (dia_do_evento, argumentos.antes, argumentos.depois,
+                     argumentos.recuo)
             if chave not in cache_controle:
                 cache_controle[chave] = controle(
                     tabela, campeoes, dia_do_evento,
                     argumentos.antes, argumentos.depois, com_evento,
-                    balanceamento
+                    balanceamento, argumentos.recuo
                 )
             referencia = cache_controle[chave]
             medida["percentil"] = percentil(medida["lift"],
@@ -805,7 +826,7 @@ def main() -> int:
             #o proprio campeao do evento levou mexida dentro da janela?
             antes_de, _, _, depois_ate = limites_da_janela(
                 tabela["dias"], dia_do_evento, argumentos.antes,
-                argumentos.depois
+                argumentos.depois, argumentos.recuo
             )
             medida["confundido"] = mexido_na_janela(
                 balanceamento, linha["champion"], antes_de, depois_ate
@@ -841,7 +862,7 @@ def main() -> int:
         contagens_do_placebo = placebo(
             tabela, campeoes, eventos_reais, argumentos.antes,
             argumentos.depois, balanceamento, argumentos.placebo,
-            SEMENTE_PLACEBO,
+            SEMENTE_PLACEBO, argumentos.recuo,
         )
 
     dados = {
@@ -852,6 +873,7 @@ def main() -> int:
         "magros_marcados": magros_marcados,
         "antes": argumentos.antes,
         "depois": argumentos.depois,
+        "recuo": argumentos.recuo,
         "picks": picks,
         "partidas": partidas,
         "dias": dias,

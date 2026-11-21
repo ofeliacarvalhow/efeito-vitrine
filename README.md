@@ -54,6 +54,19 @@ Não leia `data/raw/`.
 | lista skins novas por versão | `.venv/bin/python coleta/datadragon_skins.py` |
 | relatório de qualidade | `.venv/bin/python coleta/qualidade.py` |
 
+## Religar o coletor sozinho
+
+`coleta/retomar_coletor.cmd` religa a coleta. Ele retoma do SQLite, sem
+refazer sementes e sem baixar de novo o que ja esta no `matches.jsonl`, e se
+ja houver um coletor rodando a trava de instancia unica faz ele sair na hora
+com um recado, em vez de brigar pelo banco.
+
+Esse arquivo esta chamado na pasta de Inicializar do Windows, por
+`coletor-efeito-vitrine.cmd`, entao fazer login religa a coleta depois de uma
+queda de energia. Esse atalho vive fora do repositorio, em
+`%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup`, e some com um
+`Remove-Item` nesse caminho quando a coleta acabar.
+
 ## Contrato de dados
 
 `data/processed/daily_pickrate.csv`

@@ -54,6 +54,13 @@ JANELA_ANTES = 14
 JANELA_DEPOIS = 7
 #largura do pico, em dias, para a medida que nao depende de media longa
 LARGURA_DO_PICO = 3
+
+#afastamento da janela de antes, em dias. skin fica no PBE umas duas semanas
+#antes de entrar no jogo, entao base colada no lancamento ja viu a skin e o
+#metodo subestima. com 14 a base vai para os dias -28 a -15, antes do PBE.
+#escolhido em 20/11/2026 com 10 por cento da coleta pronta, e congelado:
+#veja analise/especificacao.md antes de mexer nisto.
+RECUO_PADRAO = 14
 #minimo de dias de cada lado, depois de recortar no periodo disponivel
 MINIMO_DE_DIAS = 5
 #do coleta/gerar_mock.py, so para o modo de teste: o pico plantado decai com
@@ -761,7 +768,7 @@ def main() -> int:
                             help="dias da janela depois do evento")
     analisador.add_argument("--placebo", type=int, default=REPETICOES_PLACEBO,
                             help="repeticoes do teste de placebo, 0 desliga")
-    analisador.add_argument("--recuo", type=int, default=0,
+    analisador.add_argument("--recuo", type=int, default=RECUO_PADRAO,
                             help="afasta a janela de antes, para escapar do "
                                  "PBE. 14 poe a base nos dias -28 a -15")
     argumentos = analisador.parse_args()

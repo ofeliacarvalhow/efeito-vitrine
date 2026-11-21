@@ -1,12 +1,12 @@
 RELATORIO DE QUALIDADE DA COLETA
-gerado em 2026-11-20 21:25 (America/Sao_Paulo)
+gerado em 2026-11-21 11:59 (America/Sao_Paulo)
 
 PARTIDAS
-  partidas unicas na fila 420: 10593
-  linhas lidas no bruto:    10600
-  duplicadas descartadas:   2
+  partidas unicas na fila 420: 23179
+  linhas lidas no bruto:    23221
+  duplicadas descartadas:   32
   fora da fila 420:          0
-  fora do periodo:          5
+  fora do periodo:          10
   linhas sem matchId:       0
   linhas quebradas:         0
 
@@ -17,85 +17,85 @@ PERIODO
   dias faltando:      0
 
 PARTIDAS POR DIA
-  minimo 65, media 139.4, maximo 247
+  minimo 225, media 305.0, maximo 397
   dias abaixo de 500 partidas: 76
 
-  2026-09-04     162  <- abaixo do minimo
-  2026-09-05     247  <- abaixo do minimo
-  2026-09-06     202  <- abaixo do minimo
-  2026-09-07     145  <- abaixo do minimo
-  2026-09-08     134  <- abaixo do minimo
-  2026-09-09     159  <- abaixo do minimo
-  2026-09-10     146  <- abaixo do minimo
-  2026-09-11     160  <- abaixo do minimo
-  2026-09-12     162  <- abaixo do minimo
-  2026-09-13     144  <- abaixo do minimo
-  2026-09-14     146  <- abaixo do minimo
-  2026-09-15     106  <- abaixo do minimo
-  2026-09-16     115  <- abaixo do minimo
-  2026-09-17     153  <- abaixo do minimo
-  2026-09-18     155  <- abaixo do minimo
-  2026-09-19     169  <- abaixo do minimo
-  2026-09-20     203  <- abaixo do minimo
-  2026-09-21     132  <- abaixo do minimo
-  2026-09-22     140  <- abaixo do minimo
-  2026-09-23     146  <- abaixo do minimo
-  2026-09-24     152  <- abaixo do minimo
-  2026-09-25     146  <- abaixo do minimo
-  2026-09-26     157  <- abaixo do minimo
-  2026-09-27     178  <- abaixo do minimo
-  2026-09-28     133  <- abaixo do minimo
-  2026-09-29     166  <- abaixo do minimo
-  2026-09-30     111  <- abaixo do minimo
-  2026-10-01     136  <- abaixo do minimo
-  2026-10-02     121  <- abaixo do minimo
-  2026-10-03     170  <- abaixo do minimo
-  2026-10-04     161  <- abaixo do minimo
-  2026-10-05     119  <- abaixo do minimo
-  2026-10-06     156  <- abaixo do minimo
-  2026-10-07     153  <- abaixo do minimo
-  2026-10-08     117  <- abaixo do minimo
-  2026-10-09     141  <- abaixo do minimo
-  2026-10-10     100  <- abaixo do minimo
-  2026-10-11     139  <- abaixo do minimo
-  2026-10-12     133  <- abaixo do minimo
-  2026-10-13     128  <- abaixo do minimo
-  2026-10-14     133  <- abaixo do minimo
-  2026-10-15     126  <- abaixo do minimo
-  2026-10-16     105  <- abaixo do minimo
-  2026-10-17     126  <- abaixo do minimo
-  2026-10-18     148  <- abaixo do minimo
-  2026-10-19     110  <- abaixo do minimo
-  2026-10-20     144  <- abaixo do minimo
-  2026-10-21     124  <- abaixo do minimo
-  2026-10-22     143  <- abaixo do minimo
-  2026-10-23      98  <- abaixo do minimo
-  2026-10-24     125  <- abaixo do minimo
-  2026-10-25     159  <- abaixo do minimo
-  2026-10-26     162  <- abaixo do minimo
-  2026-10-27     156  <- abaixo do minimo
-  2026-10-28     122  <- abaixo do minimo
-  2026-10-29     134  <- abaixo do minimo
-  2026-10-30     109  <- abaixo do minimo
-  2026-10-31      65  <- abaixo do minimo
-  2026-11-01     153  <- abaixo do minimo
-  2026-11-02     166  <- abaixo do minimo
-  2026-11-03     109  <- abaixo do minimo
-  2026-11-04     114  <- abaixo do minimo
-  2026-11-05     119  <- abaixo do minimo
-  2026-11-06      99  <- abaixo do minimo
-  2026-11-07     131  <- abaixo do minimo
-  2026-11-08     161  <- abaixo do minimo
-  2026-11-09      98  <- abaixo do minimo
-  2026-11-10     106  <- abaixo do minimo
-  2026-11-11     101  <- abaixo do minimo
-  2026-11-12     122  <- abaixo do minimo
-  2026-11-13     117  <- abaixo do minimo
-  2026-11-14     165  <- abaixo do minimo
-  2026-11-15     159  <- abaixo do minimo
-  2026-11-16     174  <- abaixo do minimo
-  2026-11-17     138  <- abaixo do minimo
-  2026-11-18     129  <- abaixo do minimo
+  2026-09-04     326  <- abaixo do minimo
+  2026-09-05     397  <- abaixo do minimo
+  2026-09-06     373  <- abaixo do minimo
+  2026-09-07     359  <- abaixo do minimo
+  2026-09-08     276  <- abaixo do minimo
+  2026-09-09     309  <- abaixo do minimo
+  2026-09-10     286  <- abaixo do minimo
+  2026-09-11     312  <- abaixo do minimo
+  2026-09-12     344  <- abaixo do minimo
+  2026-09-13     311  <- abaixo do minimo
+  2026-09-14     317  <- abaixo do minimo
+  2026-09-15     252  <- abaixo do minimo
+  2026-09-16     232  <- abaixo do minimo
+  2026-09-17     351  <- abaixo do minimo
+  2026-09-18     317  <- abaixo do minimo
+  2026-09-19     341  <- abaixo do minimo
+  2026-09-20     389  <- abaixo do minimo
+  2026-09-21     289  <- abaixo do minimo
+  2026-09-22     317  <- abaixo do minimo
+  2026-09-23     310  <- abaixo do minimo
+  2026-09-24     312  <- abaixo do minimo
+  2026-09-25     289  <- abaixo do minimo
+  2026-09-26     341  <- abaixo do minimo
+  2026-09-27     340  <- abaixo do minimo
+  2026-09-28     294  <- abaixo do minimo
+  2026-09-29     344  <- abaixo do minimo
+  2026-09-30     243  <- abaixo do minimo
+  2026-10-01     302  <- abaixo do minimo
+  2026-10-02     278  <- abaixo do minimo
+  2026-10-03     364  <- abaixo do minimo
+  2026-10-04     373  <- abaixo do minimo
+  2026-10-05     302  <- abaixo do minimo
+  2026-10-06     324  <- abaixo do minimo
+  2026-10-07     294  <- abaixo do minimo
+  2026-10-08     255  <- abaixo do minimo
+  2026-10-09     298  <- abaixo do minimo
+  2026-10-10     298  <- abaixo do minimo
+  2026-10-11     356  <- abaixo do minimo
+  2026-10-12     300  <- abaixo do minimo
+  2026-10-13     312  <- abaixo do minimo
+  2026-10-14     299  <- abaixo do minimo
+  2026-10-15     314  <- abaixo do minimo
+  2026-10-16     292  <- abaixo do minimo
+  2026-10-17     301  <- abaixo do minimo
+  2026-10-18     275  <- abaixo do minimo
+  2026-10-19     246  <- abaixo do minimo
+  2026-10-20     303  <- abaixo do minimo
+  2026-10-21     266  <- abaixo do minimo
+  2026-10-22     334  <- abaixo do minimo
+  2026-10-23     262  <- abaixo do minimo
+  2026-10-24     336  <- abaixo do minimo
+  2026-10-25     308  <- abaixo do minimo
+  2026-10-26     353  <- abaixo do minimo
+  2026-10-27     337  <- abaixo do minimo
+  2026-10-28     279  <- abaixo do minimo
+  2026-10-29     304  <- abaixo do minimo
+  2026-10-30     250  <- abaixo do minimo
+  2026-10-31     225  <- abaixo do minimo
+  2026-11-01     301  <- abaixo do minimo
+  2026-11-02     371  <- abaixo do minimo
+  2026-11-03     251  <- abaixo do minimo
+  2026-11-04     280  <- abaixo do minimo
+  2026-11-05     256  <- abaixo do minimo
+  2026-11-06     245  <- abaixo do minimo
+  2026-11-07     319  <- abaixo do minimo
+  2026-11-08     327  <- abaixo do minimo
+  2026-11-09     261  <- abaixo do minimo
+  2026-11-10     276  <- abaixo do minimo
+  2026-11-11     268  <- abaixo do minimo
+  2026-11-12     283  <- abaixo do minimo
+  2026-11-13     268  <- abaixo do minimo
+  2026-11-14     308  <- abaixo do minimo
+  2026-11-15     331  <- abaixo do minimo
+  2026-11-16     324  <- abaixo do minimo
+  2026-11-17     311  <- abaixo do minimo
+  2026-11-18     288  <- abaixo do minimo
 
 DATA DE CADA PATCH NO BR1
   medida nas partidas coletadas, nao copiada de fora. um
@@ -105,36 +105,36 @@ DATA DE CADA PATCH NO BR1
   o patch cabe, em vez de um dia inventado.
 
   16.17: ja estava no ar em 2026-09-04, inicio do periodo
-         1070 partidas em 7 dias, de 2026-09-04 a 2026-09-10
+         2074 partidas em 7 dias, de 2026-09-04 a 2026-09-10
   16.18: entrou em 2026-09-10, quinta, dia de virada capturado
-         1928 partidas em 14 dias, de 2026-09-10 a 2026-09-23
+         4074 partidas em 14 dias, de 2026-09-10 a 2026-09-23
   16.19: entrou em 2026-09-23, quarta, dia de virada capturado, 13 dias depois do anterior
-         2056 partidas em 15 dias, de 2026-09-23 a 2026-10-07
+         4404 partidas em 15 dias, de 2026-09-23 a 2026-10-07
   16.20: entrou em 2026-10-07, quarta, dia de virada capturado, 14 dias depois do anterior
-         1805 partidas em 15 dias, de 2026-10-07 a 2026-10-21
+         4148 partidas em 15 dias, de 2026-10-07 a 2026-10-21
   16.21: entrou em 2026-10-21, quarta, dia de virada capturado, 14 dias depois do anterior
-         1805 partidas em 15 dias, de 2026-10-21 a 2026-11-04
+         4153 partidas em 15 dias, de 2026-10-21 a 2026-11-04
   16.22: entrou em 2026-11-04, quarta, dia de virada capturado, 14 dias depois do anterior
-         1821 partidas em 15 dias, de 2026-11-04 a 2026-11-18
+         4077 partidas em 15 dias, de 2026-11-04 a 2026-11-18
   16.23: entrou em 2026-11-18, quarta, dia de virada capturado, 14 dias depois do anterior
-         108 partidas em 1 dia, de 2026-11-18 a 2026-11-18
+         249 partidas em 1 dia, de 2026-11-18 a 2026-11-18
 
   6 de 7 patches com data exata. o resto aperta
   conforme a coleta avanca e mais dias de virada entram na amostra.
 
 VERSOES DO JOGO POR SEMANA
-  semana  1 (2026-09-04 a 2026-09-06): 16.17 (611)
-  semana  2 (2026-09-07 a 2026-09-13): 16.17 (459), 16.18 (591)
-  semana  3 (2026-09-14 a 2026-09-20): 16.18 (1047)
-  semana  4 (2026-09-21 a 2026-09-27): 16.18 (290), 16.19 (761)
-  semana  5 (2026-09-28 a 2026-10-04): 16.19 (998)
-  semana  6 (2026-10-05 a 2026-10-11): 16.19 (297), 16.20 (628)
-  semana  7 (2026-10-12 a 2026-10-18): 16.20 (899)
-  semana  8 (2026-10-19 a 2026-10-25): 16.20 (278), 16.21 (625)
-  semana  9 (2026-10-26 a 2026-11-01): 16.21 (901)
-  semana 10 (2026-11-02 a 2026-11-08): 16.21 (279), 16.22 (620)
-  semana 11 (2026-11-09 a 2026-11-15): 16.22 (868)
-  semana 12 (2026-11-16 a 2026-11-18): 16.22 (333), 16.23 (108)
+  semana  1 (2026-09-04 a 2026-09-06): 16.17 (1096)
+  semana  2 (2026-09-07 a 2026-09-13): 16.17 (978), 16.18 (1219)
+  semana  3 (2026-09-14 a 2026-09-20): 16.18 (2199)
+  semana  4 (2026-09-21 a 2026-09-27): 16.18 (656), 16.19 (1542)
+  semana  5 (2026-09-28 a 2026-10-04): 16.19 (2198)
+  semana  6 (2026-10-05 a 2026-10-11): 16.19 (664), 16.20 (1463)
+  semana  7 (2026-10-12 a 2026-10-18): 16.20 (2093)
+  semana  8 (2026-10-19 a 2026-10-25): 16.20 (592), 16.21 (1463)
+  semana  9 (2026-10-26 a 2026-11-01): 16.21 (2049)
+  semana 10 (2026-11-02 a 2026-11-08): 16.21 (641), 16.22 (1408)
+  semana 11 (2026-11-09 a 2026-11-15): 16.22 (1995)
+  semana 12 (2026-11-16 a 2026-11-18): 16.22 (674), 16.23 (249)
 
 ARQUIVOS ENTREGUES
   daily_pickrate.csv: 13148 linhas, 76 dias x 173 campeoes

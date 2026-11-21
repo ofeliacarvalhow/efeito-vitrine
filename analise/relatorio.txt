@@ -2,7 +2,7 @@ EFEITO VITRINE: ANTES E DEPOIS
 fonte: data/processed/daily_pickrate.csv
 janela: base nos dias -28 a -15, afastada 14 dias para escapar do PBE, e 7 dias depois do evento
 periodo do dado: 2026-09-04 a 2026-11-18
-partidas por dia na amostra: media 139
+partidas por dia na amostra: media 305
 
 COMO LER
   lift e a taxa media depois dividida pela taxa antes.
@@ -22,9 +22,9 @@ COMO LER
 clipe-dj-sona-remix-supremo  (clipe, 2026-11-05)
   K/DA, DJ Sona - GIRLS  ft. Sophie Powers, Sorana, Royal & the Serpent 
   campeao         antes   depois    lift  perc    pico  perc         picks
-  Sona           0.0817   0.0859   1.05x   p57   1.28x   p52   145 /    70
+  Sona           0.0790   0.0804   1.02x   p54   1.13x   p43   325 /   157
   acima de p90: 0 de 1 campeoes
-  grupo: 1 de 1 campeoes acima do tipico, chance 0.500 por acaso
+  grupo: 0 de 1 campeoes acima do tipico, chance 1.000 por acaso
   controle: 137 campeoes, 12 tirados por mexida de balanceamento na janela
   [ressalva] 1 campeoes com os intervalos de 95% se cruzando: a amostra nao sustenta a diferenca
 
@@ -35,26 +35,26 @@ clipe-heartsteel-live-my-life  (clipe, 2026-09-18)
 clipe-k-da-firestarter  (clipe, 2026-10-18)
   K/DA - FIRESTARTER ft. MIYEON and SOYEON of i-dle, Sophie Powers, Mimi
   campeao         antes   depois    lift  perc    pico  perc         picks
-  Ahri           0.1119   0.0998   0.89x   p39   1.27x   p66   234 /    89
-  Akali          0.0736   0.0998   1.35x   p93   1.78x   p94   154 /    89 *
-  Evelynn        0.0191   0.0303   1.58x   p97   2.00x   p96    40 /    27 *
-  Kaisa          0.1440   0.1525   1.06x   p64   1.31x   p69   301 /   136
+  Ahri           0.1097   0.0989   0.90x   p31   1.03x   p35   484 /   200
+  Akali          0.0793   0.1034   1.30x   p94   1.56x   p91   350 /   209 *
+  Evelynn        0.0204   0.0262   1.28x   p94   1.47x   p91    90 /    53 *
+  Kaisa          0.1485   0.1489   1.00x   p60   1.18x   p63   655 /   301
   acima de p90: 2 de 4 campeoes
-  grupo: 4 de 4 campeoes acima do tipico, chance 0.062 por acaso
+  grupo: 3 de 4 campeoes acima do tipico, chance 0.312 por acaso
   controle: 121 campeoes, 20 tirados por mexida de balanceamento na janela
-  [ressalva] 4 campeoes com os intervalos de 95% se cruzando: a amostra nao sustenta a diferenca
+  [ressalva] 3 campeoes com os intervalos de 95% se cruzando: a amostra nao sustenta a diferenca
   [ressalva] 1 campeoes com menos de 100 escolhas na janela de antes: numero ruidoso
 
 clipe-true-damage-know-my-name  (clipe, 2026-10-08)
   Know My Name ft. True Damage (Official Music Video) | League of Legend
   campeao         antes   depois    lift  perc    pico  perc         picks
-  Akali          0.0828   0.0797   0.96x   p46   1.10x   p40   172 /    71
-  Ekko           0.1054   0.1313   1.25x   p83   1.27x   p58   219 /   117 CONFUNDIDO
-  Qiyana         0.1261   0.1291   1.02x   p58   1.15x   p43   262 /   115
-  Senna          0.0515   0.0516   1.00x   p54   1.25x   p55   107 /    46
-  Yasuo          0.2046   0.1930   0.94x   p43   1.01x   p26   425 /   172
+  Akali          0.0767   0.0807   1.05x   p66   1.15x   p50   335 /   171
+  Ekko           0.1062   0.1294   1.22x   p89   1.28x   p74   464 /   274 CONFUNDIDO
+  Qiyana         0.1181   0.1331   1.13x   p77   1.18x   p53   516 /   282
+  Senna          0.0508   0.0567   1.11x   p74   1.20x   p56   222 /   120
+  Yasuo          0.1909   0.1780   0.93x   p38   0.95x   p17   834 /   377
   acima de p90: 0 de 5 campeoes
-  grupo: 2 de 5 campeoes acima do tipico, chance 0.812 por acaso
+  grupo: 4 de 5 campeoes acima do tipico, chance 0.188 por acaso
   controle: 133 campeoes, 18 tirados por mexida de balanceamento na janela
   [confundido] Ekko levou mudanca de balanceamento dentro da janela, entao aqui a skin e o balanceamento nao se separam
   [ressalva] 5 campeoes com os intervalos de 95% se cruzando: a amostra nao sustenta a diferenca
@@ -62,44 +62,42 @@ clipe-true-damage-know-my-name  (clipe, 2026-10-08)
 exposicao-2026-11-14  (exposicao, 2026-11-14)
   Worlds 2026 Final Opening Ceremony ft. K/DA and True Damage | Presente
   campeao         antes   depois    lift  perc    pico  perc         picks
-  Ahri           0.1113   0.1242   1.12x   p67   1.20x   p60   207 /    95
-  Akali          0.0962   0.1020   1.06x   p58   1.15x   p54   179 /    78
-  Ekko           0.1247   0.1281   1.03x   p55   1.15x   p54   232 /    98
-  Evelynn        0.0317   0.0444   1.40x   p86   1.52x   p81    59 /    34
-  Kaisa          0.1559   0.1582   1.01x   p53   1.21x   p60   290 /   121
-  Qiyana         0.1097   0.1098   1.00x   p51   1.18x   p57   204 /    84
-  Senna          0.0527   0.0667   1.27x   p81   1.55x   p83    98 /    51
-  Yasuo          0.2065   0.1765   0.85x   p28   0.89x   p19   384 /   135
-  acima de p90: 0 de 8 campeoes
-  grupo: 7 de 8 campeoes acima do tipico, chance 0.035 por acaso
+  Ahri           0.1074   0.1274   1.19x   p76   1.28x   p73   446 /   199
+  Akali          0.1047   0.0948   0.90x   p33   0.97x   p33   435 /   148
+  Ekko           0.1182   0.1248   1.06x   p66   1.10x   p54   491 /   195
+  Evelynn        0.0274   0.0461   1.68x   p97   1.82x   p97   114 /    72 *
+  Kaisa          0.1615   0.1703   1.05x   p64   1.14x   p61   671 /   266
+  Qiyana         0.1100   0.1120   1.02x   p60   1.10x   p54   457 /   175
+  Senna          0.0474   0.0640   1.35x   p87   1.55x   p90   197 /   100 *
+  Yasuo          0.2022   0.1677   0.83x   p19   0.84x   p11   840 /   262
+  acima de p90: 2 de 8 campeoes
+  grupo: 6 de 8 campeoes acima do tipico, chance 0.145 por acaso
   controle: 134 campeoes, 15 tirados por mexida de balanceamento na janela
-  [ressalva] 8 campeoes com os intervalos de 95% se cruzando: a amostra nao sustenta a diferenca
-  [ressalva] 2 campeoes com menos de 100 escolhas na janela de antes: numero ruidoso
+  [ressalva] 6 campeoes com os intervalos de 95% se cruzando: a amostra nao sustenta a diferenca
 
 exposicao-new-dawn-teaser  (exposicao, 2026-11-14)
   League of Legends: New Dawn Teaser
   campeao         antes   depois    lift  perc    pico  perc         picks
-  Ashe           0.0860   0.0876   1.02x   p53   1.03x   p36   160 /    67
-  Blitzcrank     0.0441   0.0497   1.13x   p69   1.35x   p72    82 /    38
-  Ekko           0.1247   0.1281   1.03x   p55   1.15x   p54   232 /    98
-  Garen          0.0489   0.0706   1.44x   p87   1.40x   p76    91 /    54
-  Irelia         0.0806   0.0680   0.84x   p27   0.82x   p15   150 /    52
-  Kaisa          0.1559   0.1582   1.01x   p53   1.21x   p60   290 /   121
-  Leona          0.0538   0.0523   0.97x   p45   1.16x   p55   100 /    40
-  Lux            0.1581   0.1359   0.86x   p29   0.90x   p19   294 /   104
-  Malphite       0.0828   0.0810   0.98x   p47   1.03x   p35   154 /    62
-  MasterYi       0.0661   0.0536   0.81x   p23   0.96x   p28   123 /    41
-  Poppy          0.0333   0.0314   0.94x   p40   0.96x   p28    62 /    24
-  Sett           0.0441   0.0405   0.92x   p38   1.30x   p69    82 /    31
-  Vayne          0.0511   0.0549   1.07x   p61   1.10x   p48    95 /    42
-  Volibear       0.0575   0.0392   0.68x    p7   0.83x   p15   107 /    30
-  Xayah          0.0559   0.0614   1.10x   p63   1.05x   p39   104 /    47
-  Yasuo          0.2065   0.1765   0.85x   p28   0.89x   p19   384 /   135
+  Ashe           0.0891   0.0948   1.06x   p66   1.10x   p54   370 /   148
+  Blitzcrank     0.0414   0.0506   1.22x   p78   1.35x   p78   172 /    79
+  Ekko           0.1182   0.1248   1.06x   p66   1.10x   p54   491 /   195
+  Garen          0.0474   0.0634   1.34x   p86   1.30x   p74   197 /    99
+  Irelia         0.0831   0.0659   0.79x   p14   0.81x    p8   345 /   103
+  Kaisa          0.1615   0.1703   1.05x   p64   1.14x   p61   671 /   266
+  Leona          0.0568   0.0474   0.83x   p19   0.91x   p21   236 /    74
+  Lux            0.1538   0.1223   0.79x   p14   0.82x    p9   639 /   191
+  Malphite       0.0831   0.0762   0.92x   p37   1.03x   p42   345 /   119
+  MasterYi       0.0669   0.0557   0.83x   p19   0.87x   p16   278 /    87
+  Poppy          0.0294   0.0371   1.26x   p80   1.44x   p84   122 /    58
+  Sett           0.0481   0.0410   0.85x   p22   0.99x   p35   200 /    64
+  Vayne          0.0585   0.0544   0.93x   p40   1.01x   p41   243 /    85
+  Volibear       0.0563   0.0378   0.67x    p2   0.74x    p4   234 /    59
+  Xayah          0.0554   0.0563   1.02x   p60   1.01x   p41   230 /    88
+  Yasuo          0.2022   0.1677   0.83x   p19   0.84x   p11   840 /   262
   acima de p90: 0 de 16 campeoes
   grupo: 6 de 16 campeoes acima do tipico, chance 0.895 por acaso
   controle: 134 campeoes, 15 tirados por mexida de balanceamento na janela
-  [ressalva] 16 campeoes com os intervalos de 95% se cruzando: a amostra nao sustenta a diferenca
-  [ressalva] 5 campeoes com menos de 100 escolhas na janela de antes: numero ruidoso
+  [ressalva] 13 campeoes com os intervalos de 95% se cruzando: a amostra nao sustenta a diferenca
 
 skin-16.18-lenda-ascendida  (skin, 2026-09-10)
   Orianna Lenda Ascendida
@@ -108,18 +106,18 @@ skin-16.18-lenda-ascendida  (skin, 2026-09-10)
 skin-16.19-congregacao-das-bruxas  (skin, 2026-09-23)
   Janna Congregação das Bruxas
   campeao         antes   depois    lift  perc    pico  perc         picks
-  Janna          0.0573   0.1364   2.38x   p99   2.79x   p99    51 /   147 *
-  Mel            0.0618   0.0557   0.90x   p38   1.11x   p44    55 /    60
+  Janna          0.0560   0.1439   2.57x  p100   2.94x  p100    97 /   321 *
+  Mel            0.0618   0.0552   0.89x   p29   1.08x   p45   107 /   123
   acima de p90: 1 de 2 campeoes
   grupo: 1 de 2 campeoes acima do tipico, chance 0.750 por acaso
   controle: 133 campeoes, 19 tirados por mexida de balanceamento na janela
   [ressalva] 1 campeoes com os intervalos de 95% se cruzando: a amostra nao sustenta a diferenca
-  [ressalva] 2 campeoes com menos de 100 escolhas na janela de antes: numero ruidoso
+  [ressalva] 1 campeoes com menos de 100 escolhas na janela de antes: numero ruidoso
 
 skin-16.19-deus-antigo  (skin, 2026-09-23)
   Urgot Deus Antigo
   campeao         antes   depois    lift  perc    pico  perc         picks
-  Urgot          0.0225   0.0445   1.98x   p98   2.61x   p99    20 /    48 *
+  Urgot          0.0214   0.0332   1.55x   p95   1.87x   p95    37 /    74 *
   acima de p90: 1 de 1 campeoes
   grupo: 1 de 1 campeoes acima do tipico, chance 0.500 por acaso
   controle: 133 campeoes, 19 tirados por mexida de balanceamento na janela
@@ -129,7 +127,7 @@ skin-16.19-deus-antigo  (skin, 2026-09-23)
 skin-16.19-deusa-antiga  (skin, 2026-09-23)
   Anivia Deusa Antiga
   campeao         antes   depois    lift  perc    pico  perc         picks
-  Anivia         0.0348   0.0297   0.85x   p30   1.10x   p43    31 /    32
+  Anivia         0.0387   0.0265   0.68x    p5   0.85x    p8    67 /    59
   acima de p90: 0 de 1 campeoes
   grupo: 0 de 1 campeoes acima do tipico, chance 1.000 por acaso
   controle: 133 campeoes, 19 tirados por mexida de balanceamento na janela
@@ -139,54 +137,51 @@ skin-16.19-deusa-antiga  (skin, 2026-09-23)
 skin-16.20-barao-classico  (skin, 2026-10-07)
   Kog'Maw Barão Clássico de Prestígio
   campeao         antes   depois    lift  perc    pico  perc         picks
-  KogMaw         0.0287   0.0395   1.38x   p89   1.57x   p78    60 /    36
+  KogMaw         0.0295   0.0345   1.17x   p84   1.24x   p65   129 /    73
   acima de p90: 0 de 1 campeoes
   grupo: 1 de 1 campeoes acima do tipico, chance 0.500 por acaso
   controle: 134 campeoes, 18 tirados por mexida de balanceamento na janela
   [ressalva] 1 campeoes com os intervalos de 95% se cruzando: a amostra nao sustenta a diferenca
-  [ressalva] 1 campeoes com menos de 100 escolhas na janela de antes: numero ruidoso
 
 skin-16.20-heartsteel-live-my-life  (skin, 2026-10-07)
   Aphelios HEARTSTEEL Live My Life
   campeao         antes   depois    lift  perc    pico  perc         picks
-  Aphelios       0.0321   0.0681   2.12x   p99   2.87x   p99    67 /    62 *
-  Ezreal         0.1344   0.1504   1.12x   p67   1.21x   p51   281 /   137
-  KSante         0.0373   0.0461   1.24x   p83   1.42x   p72    78 /    42 CONFUNDIDO
-  Kayn           0.1024   0.1164   1.14x   p69   1.55x   p78   214 /   106
-  Sett           0.0593   0.0615   1.04x   p57   1.27x   p55   124 /    56
-  Yone           0.1593   0.1592   1.00x   p52   1.21x   p51   333 /   145
+  Aphelios       0.0339   0.0653   1.93x   p99   2.14x   p99   148 /   138 *
+  Ezreal         0.1365   0.1391   1.02x   p59   1.08x   p37   596 /   294
+  KSante         0.0343   0.0412   1.20x   p85   1.41x   p85   150 /    87 CONFUNDIDO
+  Kayn           0.1088   0.1112   1.02x   p60   1.21x   p63   475 /   235
+  Sett           0.0497   0.0558   1.12x   p79   1.25x   p69   217 /   118
+  Yone           0.1605   0.1585   0.99x   p55   1.16x   p54   701 /   335
   acima de p90: 1 de 6 campeoes
-  grupo: 6 de 6 campeoes acima do tipico, chance 0.016 por acaso
+  grupo: 5 de 6 campeoes acima do tipico, chance 0.109 por acaso
   controle: 134 campeoes, 18 tirados por mexida de balanceamento na janela
   [confundido] KSante levou mudanca de balanceamento dentro da janela, entao aqui a skin e o balanceamento nao se separam
   [ressalva] 5 campeoes com os intervalos de 95% se cruzando: a amostra nao sustenta a diferenca
-  [ressalva] 2 campeoes com menos de 100 escolhas na janela de antes: numero ruidoso
 
 skin-16.21-true-damage-know-my-name  (skin, 2026-10-21)
   Akali True Damage Know My Name
   campeao         antes   depois    lift  perc    pico  perc         picks
-  Akali          0.0746   0.1055   1.41x   p92   1.76x   p88   153 /   102
-  Ekko           0.1116   0.1231   1.10x   p65   1.40x   p72   229 /   119
-  Qiyana         0.1413   0.1127   0.80x   p24   0.84x    p8   290 /   109
-  Senna          0.0580   0.0579   1.00x   p51   1.18x   p49   119 /    56
-  Yasuo          0.1813   0.2161   1.19x   p76   1.38x   p72   372 /   209
+  Akali          0.0797   0.1120   1.41x   p92   1.55x   p85   352 /   246
+  Ekko           0.1089   0.1198   1.10x   p69   1.25x   p65   481 /   263
+  Qiyana         0.1322   0.1166   0.88x   p29   0.99x   p25   584 /   256
+  Senna          0.0557   0.0501   0.90x   p32   1.05x   p35   246 /   110
+  Yasuo          0.1852   0.2045   1.10x   p70   1.27x   p66   818 /   449
   acima de p90: 0 de 5 campeoes
   grupo: 3 de 5 campeoes acima do tipico, chance 0.500 por acaso
   controle: 119 campeoes, 20 tirados por mexida de balanceamento na janela
-  [ressalva] 5 campeoes com os intervalos de 95% se cruzando: a amostra nao sustenta a diferenca
+  [ressalva] 4 campeoes com os intervalos de 95% se cruzando: a amostra nao sustenta a diferenca
 
 skin-16.22-k-da-firestarter  (skin, 2026-11-04)
   Ahri K/DA FIRESTARTER
   campeao         antes   depois    lift  perc    pico  perc         picks
-  Ahri           0.1204   0.1184   0.98x   p48   1.14x   p41   217 /    98
-  Akali          0.0776   0.1135   1.46x   p89   1.81x   p88   140 /    94
-  Evelynn        0.0266   0.0556   2.09x   p98   2.69x   p98    48 /    46 *
-  Kaisa          0.1265   0.1908   1.51x   p90   1.71x   p85   228 /   158
+  Ahri           0.1101   0.1125   1.02x   p53   1.11x   p45   456 /   221
+  Akali          0.0813   0.1085   1.33x   p88   1.38x   p77   337 /   213
+  Evelynn        0.0268   0.0596   2.22x   p99   2.77x   p99   111 /   117 *
+  Kaisa          0.1484   0.1792   1.21x   p79   1.32x   p70   615 /   352
   acima de p90: 1 de 4 campeoes
   grupo: 3 de 4 campeoes acima do tipico, chance 0.312 por acaso
   controle: 128 campeoes, 15 tirados por mexida de balanceamento na janela
   [ressalva] 1 campeoes com os intervalos de 95% se cruzando: a amostra nao sustenta a diferenca
-  [ressalva] 1 campeoes com menos de 100 escolhas na janela de antes: numero ruidoso
 
 skin-16.23-dj-sona-remix-supremo  (skin, 2026-11-18)
   DJ Sona Remix Supremo
@@ -203,13 +198,13 @@ trailer-heartsteel-live-my-life  (trailer, 2026-09-22)
 trailer-true-damage-know-my-name  (trailer, 2026-10-06)
   True Damage: Know My Name | Skins Trailer - League of Legends
   campeao         antes   depois    lift  perc    pico  perc         picks
-  Akali          0.0801   0.0788   0.98x   p49   1.14x   p43   167 /    74
-  Ekko           0.1056   0.1225   1.16x   p74   1.27x   p59   220 /   115 CONFUNDIDO
-  Qiyana         0.1286   0.1257   0.98x   p48   1.06x   p32   268 /   118
-  Senna          0.0509   0.0554   1.09x   p68   1.26x   p57   106 /    52
-  Yasuo          0.2011   0.1949   0.97x   p46   1.05x   p30   419 /   183
+  Akali          0.0744   0.0767   1.03x   p63   1.04x   p25   322 /   163
+  Ekko           0.1063   0.1200   1.13x   p80   1.28x   p70   460 /   255 CONFUNDIDO
+  Qiyana         0.1167   0.1261   1.08x   p73   1.13x   p47   505 /   268
+  Senna          0.0541   0.0541   1.00x   p56   1.12x   p46   234 /   115
+  Yasuo          0.1891   0.1765   0.93x   p34   1.01x   p20   818 /   375
   acima de p90: 0 de 5 campeoes
-  grupo: 2 de 5 campeoes acima do tipico, chance 0.812 por acaso
+  grupo: 1 de 5 campeoes acima do tipico, chance 0.969 por acaso
   controle: 134 campeoes, 18 tirados por mexida de balanceamento na janela
   [confundido] Ekko levou mudanca de balanceamento dentro da janela, entao aqui a skin e o balanceamento nao se separam
   [ressalva] 5 campeoes com os intervalos de 95% se cruzando: a amostra nao sustenta a diferenca
@@ -220,21 +215,21 @@ TESTE DE PLACEBO
   isso mostra quantos destaques o metodo inventa quando nao ha
   efeito nenhum para achar.
 
-  momentos campeao-data distintos com destaque: 6
-  pares campeao-evento marcados, antes do corte: 6
-  destaques com data sorteada:   media 5.0, minimo 0, maximo 10
-  percentil 95 do sorteio:       8
-  sorteios que empataram ou passaram o real: 75 de 200, ou seja 0.375
+  momentos campeao-data distintos com destaque: 8
+  pares campeao-evento marcados, antes do corte: 8
+  destaques com data sorteada:   media 4.0, minimo 1, maximo 8
+  percentil 95 do sorteio:       6
+  sorteios que empataram ou passaram o real: 4 de 200, ou seja 0.020
 
-  CUIDADO: 5 dos 6 pares marcados vem de campeao com menos de 100 escolhas na
+  CUIDADO: 3 dos 8 pares marcados vem de campeao com menos de 100 escolhas na
   janela de antes. em campeao pouco escolhido, meia
   duzia de escolhas a mais ja vira lift de duas vezes,
   entao esse resultado esta pendurado nos numeros mais
   ruidosos da amostra. compare com os testes por tipo,
   logo abaixo: se eles nao acompanham, nao conclua.
 
-  leitura: o resultado real cabe tranquilamente no que o acaso
-  produz. nao ha efeito para relatar.
+  leitura: o acaso raramente produz tanto destaque assim.
+  aqui ha efeito a relatar.
 
 TESTE AGRUPADO POR TIPO DE EVENTO
   esta e a pergunta do projeto: skin levanta a taxa?
@@ -246,9 +241,9 @@ TESTE AGRUPADO POR TIPO DE EVENTO
 
   tipo           acima    de   chance
   clipe              7    10    0.172
-  exposicao         13    24    0.419
-  skin              15    20    0.021
-  trailer            2     5    0.812
+  exposicao         12    24    0.581
+  skin              14    20    0.058
+  trailer            1     5    0.969
 
   CUIDADO: clipe 6, skin 1, trailer 5 linhas tem evento de OUTRO tipo
   do mesmo campeao dentro da janela. clipe e trailer
@@ -263,7 +258,7 @@ TESTE AGRUPADO POR TIPO DE EVENTO
   tipos testados o corte honesto fica mais perto de 0.01.
 
 RESUMO
-  59 pares campeao-evento medidos, 6 acima de p90
+  59 pares campeao-evento medidos, 8 acima de p90
   por acaso, esperado acima de p90: 5.9
   se o numero de destaques nao passa do esperado por
   acaso, o dado nao mostra efeito nenhum ainda.

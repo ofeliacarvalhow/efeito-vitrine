@@ -478,7 +478,14 @@ def coleta(cliente: ClienteRiot, con: sqlite3.Connection,
                  f"cheia, {sum(metas)} no periodo todo")
         while not hora_de_parar(estado):
             trabalhou = False
-            for indice, (inicio_dia, fim_dia) in enumerate(janelas, start=1):
+            #a semana mais atrasada vai primeiro. sem isso, estender o
+            #periodo deixaria as semanas novas sempre o mesmo tanto atras
+            #das antigas, porque o rodizio daria lotes iguais a todas.
+            ordem = sorted(
+                enumerate(janelas, start=1),
+                key=lambda par: conta_ids(con, par[0], "baixado"),
+            )
+            for indice, (inicio_dia, fim_dia) in ordem:
                 if hora_de_parar(estado):
                     break
                 meta = metas[indice - 1]

@@ -12,8 +12,13 @@ from zoneinfo import ZoneInfo
 RAIZ = Path(__file__).resolve().parents[1]
 ARQUIVO_ENV = RAIZ / ".env"
 
-#periodo analisado, confirmado pelo teste_historico.py em 20/11/2026
-DATA_INICIAL = date(2026, 9, 4)
+#periodo analisado. comecou em 4 de setembro e foi estendido para tras em
+#21/11/2026, por poder estatistico: com 76 dias o estudo tinha 24 por cento
+#de chance de achar o efeito mesmo se ele existisse, porque o teste conta
+#campeoes por evento e so havia 20 pares. com 270 dias sao cerca de 71 pares
+#e 86 por cento. o historico da API e o rendimento por jogador foram medidos
+#nessas datas antigas e nao caem.
+DATA_INICIAL = date(2026, 2, 24)
 DATA_FINAL = date(2026, 11, 18)
 FUSO = ZoneInfo("America/Sao_Paulo")
 
@@ -74,13 +79,15 @@ IDIOMA_DDRAGON = "pt_BR"
 ESPERA_DDRAGON = 0.05
 
 #patches do periodo. o versions.json numera 16.1 a 16.23, com um build por
-#patch, e nao existe 26.x nenhum. os sete patches abaixo sao os equivalentes
-#aos 26.17 a 26.23 que o plano do projeto pediu.
-PATCHES = ["16.17", "16.18", "16.19", "16.20", "16.21", "16.22", "16.23"]
+#patch, e nao existe 26.x nenhum. a lista cobre de 16.3, que estava no ar em
+#24 de fevereiro, ate 16.23, que entrou em 18 de novembro.
+PATCHES = ["16.3", "16.4", "16.5", "16.6", "16.7", "16.8", "16.9",
+           "16.10", "16.11", "16.12", "16.13", "16.14", "16.15", "16.16",
+           "16.17", "16.18", "16.19", "16.20", "16.21", "16.22", "16.23"]
 
 #patch anterior ao primeiro, baixado so para servir de comparacao e revelar
-#as skins novas do 16.17. nao gera linha propria no CSV.
-PATCH_BASE = "16.16"
+#as skins novas do primeiro. nao gera linha propria no CSV.
+PATCH_BASE = "16.2"
 
 BANCO = RAIZ / "data" / "raw" / "coleta.sqlite"
 #trava de instancia unica. o sistema solta sozinho quando o processo morre,

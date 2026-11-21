@@ -54,6 +54,16 @@ Não leia `data/raw/`.
 | lista skins novas por versão | `.venv/bin/python coleta/datadragon_skins.py` |
 | relatório de qualidade | `.venv/bin/python coleta/qualidade.py` |
 
+## NUNCA rode o coletor dentro do app do Claude
+
+A aba de terminal do app vive dentro dele. Se o app fechar ou reiniciar, o
+shell morre e leva o coletor junto, sem erro no log e sem aviso: a ultima
+linha e um progresso normal e depois o silencio. Isso ja custou duas horas de
+coleta na madrugada de 21/11.
+
+Rode sempre numa janela propria, que sobrevive ao app. O jeito mais simples e
+dar dois cliques em `coleta/retomar_coletor.cmd`.
+
 ## Religar o coletor sozinho
 
 `coleta/retomar_coletor.cmd` religa a coleta. Ele retoma do SQLite, sem

@@ -24,6 +24,7 @@ Rodar:  .venv\\Scripts\\python.exe coleta/datadragon_balanceamento.py
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import csv
 import json
 import os
@@ -45,6 +46,12 @@ LIMITE_DE_MUDANCAS = 6
 
 #os 4 feiticos saem na ordem Q, W, E, R
 TECLAS = ["Q", "W", "E", "R"]
+
+
+#fracao de campeoes a partir da qual uma mudanca no mesmo campo deixa de ser
+#balanceamento e passa a ser mudanca da fonte. a Riot mexe em 5 a 25
+#campeoes por patch, nunca em metade do elenco no mesmo atributo.
+LIMITE_DE_MASSA = 0.5
 
 
 def numero(valor) -> str:
@@ -95,6 +102,11 @@ def le_campeoes(pasta: Path) -> dict[str, dict]:
             print(f"[aviso] {arquivo.name} ilegivel em {pasta.name}: {erro}")
             continue
         for identificador, detalhe in (dados.get("data") or {}).items():
+            #o Data Dragon traz entradas que nao sao campeao do jogo normal,
+            #como os 60 Jade_ que apareceram no 16.15. campeao de verdade
+            #nunca tem sublinhado no id.
+            if "_" in identificador:
+                continue
             campeoes[identificador] = detalhe
     return campeoes
 
@@ -130,9 +142,14 @@ def diferencas_de_efeito(tecla: str, velho, novo) -> list[str]:
     return achados
 
 
-def mudancas_do_campeao(antes: dict, agora: dict) -> list[str]:
-    """Lista de mudancas de numero de um campeao entre dois patches."""
-    achados: list[str] = []
+def mudancas_do_campeao(antes: dict, agora: dict) -> list[tuple[str, str]]:
+    """Mudancas de um campeao entre dois patches, como (campo, texto).
+
+    O campo serve para detectar mudanca em massa: se o mesmo campo muda em
+    quase todos os campeoes, foi a fonte que mudou e nao a Riot que
+    balanceou.
+    """
+    achados: list[tuple[str, str]] = []
 
     stats_antes = antes.get("stats") or {}
     stats_agora = agora.get("stats") or {}
@@ -143,14 +160,15 @@ def mudancas_do_campeao(antes: dict, agora: dict) -> list[str]:
         novo = stats_agora[atributo]
         if velho == novo:
             continue
-        achados.append(f"{atributo} {numero(velho)} para {numero(novo)}")
+        achados.append((f"stats.{atributo}",
+                        f"{atributo} {numero(velho)} para {numero(novo)}"))
 
     feiticos_antes = antes.get("spells") or []
     feiticos_agora = agora.get("spells") or []
     for indice, feitico in enumerate(feiticos_agora):
         tecla = TECLAS[indice] if indice < len(TECLAS) else f"F{indice + 1}"
         if indice >= len(feiticos_antes):
-            achados.append(f"{tecla} feitico novo")
+            achados.append((f"{tecla}.novo", f"{tecla} feitico novo"))
             continue
         velho_feitico = feiticos_antes[indice]
         for campo, nome in (("cooldown", "cooldown"), ("cost", "custo")):
@@ -158,9 +176,11 @@ def mudancas_do_campeao(antes: dict, agora: dict) -> list[str]:
             novo = feitico.get(campo)
             if velho == novo:
                 continue
-            achados.append(
-                f"{tecla} {nome} {lista_curta(velho)} para {lista_curta(novo)}"
-            )
+            achados.append((
+                f"{tecla}.{campo}",
+                f"{tecla} {nome} {lista_curta(velho)} para "
+                f"{lista_curta(novo)}",
+            ))
         velho_efeito = velho_feitico.get("effect")
         novo_efeito = feitico.get("effect")
         if velho_efeito == novo_efeito:
@@ -168,12 +188,16 @@ def mudancas_do_campeao(antes: dict, agora: dict) -> list[str]:
         if tudo_zero(velho_efeito) != tudo_zero(novo_efeito):
             #o Data Dragon ligou ou desligou a exportacao desse feitico
             continue
-        achados.extend(diferencas_de_efeito(tecla, velho_efeito, novo_efeito))
+        achados.extend(
+            (f"{tecla}.efeito", texto)
+            for texto in diferencas_de_efeito(tecla, velho_efeito,
+                                              novo_efeito)
+        )
 
     nome_antes = (antes.get("passive") or {}).get("name")
     nome_agora = (agora.get("passive") or {}).get("name")
     if nome_antes and nome_agora and nome_antes != nome_agora:
-        achados.append(f"passivo virou {nome_agora}")
+        achados.append(("passivo", f"passivo virou {nome_agora}"))
 
     return achados
 
@@ -253,11 +277,28 @@ def main() -> int:
         if not data:
             print(f"[aviso] o patch {patch} nao tem data no {DATAS.name}.")
         novos = sorted(set(agora) - set(anterior))
+        comuns = [c for c in sorted(agora) if c in anterior]
+        bruto = {c: mudancas_do_campeao(anterior[c], agora[c])
+                 for c in comuns}
+
+        #campo que muda em quase todo campeao no mesmo patch e mudanca da
+        #fonte, nao balanceamento. no 16.5 o attackdamageperlevel foi para
+        #zero em 171 campeoes de uma vez, o que nenhum patch faz.
+        quantos_por_campo = Counter(
+            campo for achados in bruto.values() for campo, _ in achados
+        )
+        limite = max(10, int(LIMITE_DE_MASSA * len(comuns)))
+        em_massa = {campo for campo, n in quantos_por_campo.items()
+                    if n >= limite}
+        for campo in sorted(em_massa):
+            print(f"  {patch}: {campo} mudou em "
+                  f"{quantos_por_campo[campo]} de {len(comuns)} campeoes, "
+                  "tratado como mudanca da fonte e descartado")
+
         do_patch = 0
-        for campeao in sorted(agora):
-            if campeao not in anterior:
-                continue
-            achados = mudancas_do_campeao(anterior[campeao], agora[campeao])
+        for campeao in comuns:
+            achados = [texto for campo, texto in bruto[campeao]
+                       if campo not in em_massa]
             if not achados:
                 continue
             linhas.append((patch, data, campeao, resume(achados)))

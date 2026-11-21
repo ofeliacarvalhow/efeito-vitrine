@@ -478,14 +478,22 @@ def coleta(cliente: ClienteRiot, con: sqlite3.Connection,
                  f"cheia, {sum(metas)} no periodo todo")
         while not hora_de_parar(estado):
             trabalhou = False
-            #a semana mais atrasada vai primeiro. sem isso, estender o
-            #periodo deixaria as semanas novas sempre o mesmo tanto atras
-            #das antigas, porque o rodizio daria lotes iguais a todas.
-            ordem = sorted(
-                enumerate(janelas, start=1),
-                key=lambda par: conta_ids(con, par[0], "baixado"),
-            )
+            #numa volta, so a semana atrasada recebe. ordenar por atraso
+            #nao basta: o laco passava por todas de qualquer jeito e dava
+            #um lote para cada, entao a diferenca entre a semana nova e a
+            #antiga nunca fechava. aqui a semana que ja esta na frente fica
+            #de fora da volta ate as outras alcancarem.
+            contagens = {
+                i: conta_ids(con, i, "baixado")
+                for i in range(1, len(janelas) + 1)
+            }
+            atraso_minimo = min(contagens.values())
+            teto_da_volta = atraso_minimo + LOTE_POR_SEMANA * 2
+            ordem = sorted(enumerate(janelas, start=1),
+                           key=lambda par: contagens[par[0]])
             for indice, (inicio_dia, fim_dia) in ordem:
+                if contagens[indice] > teto_da_volta:
+                    continue
                 if hora_de_parar(estado):
                     break
                 meta = metas[indice - 1]

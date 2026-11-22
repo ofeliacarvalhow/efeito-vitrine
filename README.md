@@ -86,7 +86,7 @@ entao basta trocar o valor e salvar: ele retoma sozinho, sem reiniciar.
 Para trocar com conferencia, use
 
 ```
-.venv\Scripts\python.exe coleta	rocar_chave.py RGAPI-...
+.venv\Scripts\python.exe coleta\trocar_chave.py RGAPI-...
 ```
 
 Ele testa a chave ate seis vezes com dez segundos de espera ANTES de gravar.

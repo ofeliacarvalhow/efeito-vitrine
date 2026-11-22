@@ -5,7 +5,7 @@ Nenhum segredo neste arquivo. A chave da Riot vive no .env, que o Git barra.
 """
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -56,6 +56,15 @@ META_PROPORCIONAL_AOS_DIAS = True
 
 #janela, em segundos, usada para estimar o tempo que falta
 JANELA_DA_TAXA = 600
+
+#hora em que a coleta encerra, aconteca o que acontecer. e um limite de
+#RELOGIO e nao de meta: se a passada 2 fechar antes, ele para antes; se
+#atrasar por queda ou troca de chave, ele para aqui mesmo assim. o rodizio
+#garante que parar a qualquer momento deixa os 268 dias com a mesma
+#densidade, entao nao existe hora ruim para parar.
+#data absoluta de proposito: sobrevive a reinicio, ao contrario de contar
+#horas desde que o processo subiu.
+PARAR_EM = datetime(2026, 11, 25, 5, 0, tzinfo=FUSO)
 
 #passada em que a coleta encerra sozinha. a passada 3 so fecharia na sexta,
 #depois do prazo do trabalho, e parar no meio de uma passada deixa as semanas

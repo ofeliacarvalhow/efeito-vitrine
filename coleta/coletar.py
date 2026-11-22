@@ -43,6 +43,7 @@ from config import (
     LOTE_POR_SEMANA,
     META_PROPORCIONAL_AOS_DIAS,
     METAS_POR_PASSADA,
+    PARAR_EM,
     PARAR_NA_PASSADA,
     PAGINAS_MAXIMAS,
     PARTIDAS,
@@ -392,6 +393,10 @@ def taxa_por_segundo(estado: dict) -> float:
 def hora_de_parar(estado: dict) -> bool:
     if estado["parar"]:
         return True
+    if PARAR_EM and datetime.now(FUSO) >= PARAR_EM:
+        estado["parar"] = True
+        estado["parou_na_hora"] = True
+        return True
     if estado["limite"] and time.monotonic() >= estado["limite"]:
         estado["parar"] = True
         return True
@@ -605,6 +610,10 @@ def main() -> int:
                    if argumentos.minutos > 0 else None),
     }
 
+    if PARAR_EM:
+        log.info(f"esta coleta encerra em {PARAR_EM:%d/%m as %Hh%M}, ou "
+                 f"antes se a passada {argumentos.ate_passada} fechar")
+
     arquivo = open(PARTIDAS, "a", encoding="utf-8")
     try:
         coleta(cliente, con, log, arquivo, janelas, estado)
@@ -616,6 +625,9 @@ def main() -> int:
         con.commit()
         baixadas = sum(conta_ids(con, i, "baixado")
                        for i in range(1, len(janelas) + 1))
+        if estado.get("parou_na_hora"):
+            log.info(f"chegou a hora marcada, {PARAR_EM:%d/%m %Hh%M}. "
+                     "encerrando com o periodo parelho.")
         log.info(f"fim desta rodada: {estado['baixadas']} partidas nesta "
                  f"execucao, {baixadas} no total, "
                  f"{cliente.requisicoes} requisicoes.")

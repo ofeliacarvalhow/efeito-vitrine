@@ -77,6 +77,27 @@ queda de energia. Esse atalho vive fora do repositorio, em
 `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup`, e some com um
 `Remove-Item` nesse caminho quando a coleta acabar.
 
+## Dados para o painel
+
+O painel vai no Vercel, que serve arquivo estatico e nao roda Python, entao
+ele nao le os CSV. O `coleta/exportar_json.py` gera `site/dados/` com cinco
+arquivos que o painel busca com `fetch`, sem backend nenhum:
+
+| arquivo | o que tem |
+|---|---|
+| `serie.json` | a serie diaria inteira, em listas paralelas |
+| `eventos.json` | um objeto por evento, com os campeoes dentro |
+| `patches.json` | a data medida de cada patch |
+| `balanceamento.json` | quem foi mexido em cada patch |
+| `resumo.json` | periodo, totais e os avisos de leitura |
+
+Sao cerca de 140 KB no total. A serie vem como listas paralelas, e nao um
+objeto por linha, o que a deixa em 108 KB em vez de alguns megabytes:
+`escolhas[campeao][i]` e o numero de escolhas no dia `dias[i]`, e a taxa e
+esse numero dividido por `partidas_por_dia[i]`.
+
+Rode de novo sempre que a coleta avancar, porque os arquivos sao um retrato.
+
 ## Contrato de dados
 
 `data/processed/daily_pickrate.csv`

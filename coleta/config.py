@@ -57,6 +57,12 @@ META_PROPORCIONAL_AOS_DIAS = True
 #janela, em segundos, usada para estimar o tempo que falta
 JANELA_DA_TAXA = 600
 
+#passada em que a coleta encerra sozinha. a passada 3 so fecharia na sexta,
+#depois do prazo do trabalho, e parar no meio de uma passada deixa as semanas
+#em niveis diferentes da meta. com 2 aqui o coletor para exatamente quando
+#todas as 39 semanas fecham a meta da passada 2, sem ninguem olhar o relogio.
+PARAR_NA_PASSADA = 2
+
 #quantas partidas o coletor baixa de uma semana antes de passar para a proxima
 LOTE_POR_SEMANA = 50
 

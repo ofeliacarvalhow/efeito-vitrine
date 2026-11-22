@@ -43,6 +43,7 @@ from config import (
     LOTE_POR_SEMANA,
     META_PROPORCIONAL_AOS_DIAS,
     METAS_POR_PASSADA,
+    PARAR_NA_PASSADA,
     PAGINAS_MAXIMAS,
     PARTIDAS,
     PROGRESSO_CADA,
@@ -468,6 +469,7 @@ def baixa_lote(cliente: ClienteRiot, con: sqlite3.Connection,
 def coleta(cliente: ClienteRiot, con: sqlite3.Connection,
            log: logging.Logger, arquivo, janelas: list[tuple[date, date]],
            estado: dict) -> None:
+    quantas_semanas = len(janelas)
     primeira = int(valor(con, "passada", "1"))
     for passada, base in enumerate(METAS_POR_PASSADA, start=1):
         if passada < primeira:
@@ -525,7 +527,26 @@ def coleta(cliente: ClienteRiot, con: sqlite3.Connection,
                 break
         if hora_de_parar(estado):
             return
-        log.info(f"passada {passada} encerrada.")
+        #o laco acima tambem sai quando nenhuma semana tem ID para baixar,
+        #nao so quando todas batem a meta. os dois casos sao diferentes e o
+        #log precisa dizer qual foi, senao um fim por falta de ID passa por
+        #passada completa.
+        abaixo = [i for i, meta in enumerate(metas, start=1)
+                  if conta_ids(con, i, "baixado") < meta]
+        if abaixo:
+            log.info(f"passada {passada} parou com {len(abaixo)} de "
+                     f"{quantas_semanas} semanas abaixo da meta. nao foi a "
+                     "meta que fechou, foi o ID que acabou.")
+        else:
+            log.info(f"passada {passada} encerrada com todas as "
+                     f"{quantas_semanas} semanas na meta.")
+        limite = estado.get("ate_passada") or 0
+        if limite and passada >= limite:
+            como = "incompleta" if abaixo else "redonda"
+            log.info(f"a passada {limite} terminou {como} e era ate aqui. "
+                     "encerrando.")
+            estado["parar"] = True
+            return
 
 
 def main() -> int:
@@ -534,6 +555,10 @@ def main() -> int:
                             help="para sozinho depois de N minutos")
     analisador.add_argument("--cada", type=int, default=PROGRESSO_CADA,
                             help="intervalo da linha de progresso")
+    analisador.add_argument("--ate-passada", type=int,
+                            default=PARAR_NA_PASSADA,
+                            help="encerra ao fechar esta passada. 0 vai ate "
+                                 "o fim das tres")
     argumentos = analisador.parse_args()
 
     random.seed(SEMENTE_SORTEIO)
@@ -574,6 +599,7 @@ def main() -> int:
         "baixadas": 0,
         "cada": max(1, argumentos.cada),
         "marcas": deque(),
+        "ate_passada": argumentos.ate_passada,
         "parar": False,
         "limite": (time.monotonic() + argumentos.minutos * 60
                    if argumentos.minutos > 0 else None),

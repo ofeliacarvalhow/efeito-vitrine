@@ -77,6 +77,25 @@ queda de energia. Esse atalho vive fora do repositorio, em
 `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup`, e some com um
 `Remove-Item` nesse caminho quando a coleta acabar.
 
+## Trocar a chave da Riot
+
+A chave de desenvolvimento vence a cada 24 horas. Quando isso acontece o
+coletor pausa, avisa na janela e fica relendo o `.env` a cada 60 segundos,
+entao basta trocar o valor e salvar: ele retoma sozinho, sem reiniciar.
+
+Para trocar com conferencia, use
+
+```
+.venv\Scripts\python.exe coleta	rocar_chave.py RGAPI-...
+```
+
+Ele testa a chave ate seis vezes com dez segundos de espera ANTES de gravar.
+Isso existe por causa de uma pegadinha que ja custou uma pausa: chave recem
+gerada leva alguns segundos para valer e responde 401 nesse intervalo. Quem
+testa na hora acha que copiou errado e volta para a anterior, que a geracao
+da nova ja invalidou, e ai ficam duas chaves mortas. Se a chave nao passar,
+o script nao grava nada e a que estava la continua.
+
 ## Dados para o painel
 
 O painel vai no Vercel, que serve arquivo estatico e nao roda Python, entao

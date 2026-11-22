@@ -483,16 +483,19 @@ def coleta(cliente: ClienteRiot, con: sqlite3.Connection,
             #um lote para cada, entao a diferenca entre a semana nova e a
             #antiga nunca fechava. aqui a semana que ja esta na frente fica
             #de fora da volta ate as outras alcancarem.
-            contagens = {
-                i: conta_ids(con, i, "baixado")
-                for i in range(1, len(janelas) + 1)
-            }
-            atraso_minimo = min(contagens.values())
-            teto_da_volta = atraso_minimo + LOTE_POR_SEMANA * 2
+            #a comparacao e por partida POR DIA, nao por total da semana.
+            #a primeira semana tem 6 dias e a ultima tem 3, entao igualar
+            #o total deixaria a de 3 dias com o dobro da densidade das de
+            #7, bem na borda onde ainda ha evento para medir.
+            por_dia = {}
+            for i, (comeco, fim) in enumerate(janelas, start=1):
+                por_dia[i] = conta_ids(con, i, "baixado") / (fim - comeco).days
+            menor = min(por_dia.values())
+            teto_da_volta = menor + LOTE_POR_SEMANA * 2 / 7
             ordem = sorted(enumerate(janelas, start=1),
-                           key=lambda par: contagens[par[0]])
+                           key=lambda par: por_dia[par[0]])
             for indice, (inicio_dia, fim_dia) in ordem:
-                if contagens[indice] > teto_da_volta:
+                if por_dia[indice] > teto_da_volta:
                     continue
                 if hora_de_parar(estado):
                     break

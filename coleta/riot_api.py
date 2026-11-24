@@ -269,17 +269,23 @@ class ClienteRiot:
             #devolve ErroDaRiot, que o baixa_lote trata deixando a partida
             #para a proxima execucao. a url nao entra na mensagem porque
             #carrega puuid.
+            #a mensagem da Riot explica o motivo do 400, e so ela diz se o
+            #problema e o puuid ou o parametro. ela viaja na excecao e nao
+            #no log daqui, porque pode trazer o puuid dentro: quem chama
+            #conhece o puuid e troca por <puuid> antes de logar.
+            try:
+                recado = ((resposta.json().get("status") or {})
+                          .get("message") or "")[:120]
+            except ValueError:
+                recado = ""
+            #"Exception decrypting" nao melhora com tentativa: o puuid foi
+            #cifrado com outra chave e vai falhar sempre. insistir custava
+            #14 segundos por jogador, e com 25 por lote a resemeadura so
+            #comecava 6 minutos depois de a coleta subir.
+            if "decrypting" in recado.lower():
+                raise ErroDaRiot(f"HTTP {codigo} inesperado: {recado}")
             falhas_da_riot += 1
             if falhas_da_riot > 3:
-                #a mensagem da Riot explica o motivo do 400, e so ela diz se
-                #o problema e o puuid ou o parametro. ela viaja na excecao e
-                #nao no log daqui, porque pode trazer o puuid dentro: quem
-                #chama conhece o puuid e troca por <puuid> antes de logar.
-                try:
-                    recado = ((resposta.json().get("status") or {})
-                              .get("message") or "")[:120]
-                except ValueError:
-                    recado = ""
                 if recado:
                     raise ErroDaRiot(
                         f"HTTP {codigo} inesperado tres vezes: {recado}")

@@ -272,8 +272,13 @@ def amplia_sementes(cliente: ClienteRiot, con: sqlite3.Connection,
 
 
 def busca_ids(cliente: ClienteRiot, con: sqlite3.Connection, semana: int,
-              inicio: int, fim: int, quantos: int) -> tuple[int, int]:
-    """Pede IDs de jogadores ainda nao consultados nesta semana."""
+              inicio: int, fim: int,
+              quantos: int) -> tuple[int, int, int]:
+    """Pede IDs de jogadores ainda nao consultados nesta semana.
+
+    Devolve quantos foram consultados, quantos IDs novos renderam e quantos
+    a chave de agora nao conseguiu decifrar.
+    """
     linhas = con.execute(
         "SELECT puuid FROM jogadores WHERE puuid NOT IN "
         "(SELECT puuid FROM sementes_usadas WHERE semana = ?) "
@@ -281,14 +286,24 @@ def busca_ids(cliente: ClienteRiot, con: sqlite3.Connection, semana: int,
         (semana, quantos),
     ).fetchall()
     if not linhas:
-        return 0, 0
+        return 0, 0, 0
     novos = 0
+    invalidos = 0
     for (puuid,) in linhas:
         try:
             ids = riot_api.ids_no_intervalo(cliente, puuid, inicio, fim)
         except riot_api.ErroDaRiot as erro:
-            #esse jogador fica marcado como consultado e a semana segue
-            cliente.aviso(f"[erro] jogador pulado nesta semana: {erro}")
+            #esse jogador fica marcado como consultado e a semana segue.
+            #o puuid sai da mensagem antes de ir para o log, e no lugar dele
+            #fica o tamanho, que e o que distingue puuid global de id antigo
+            #sem identificar ninguem.
+            recado = str(erro).replace(puuid, "<puuid>")
+            cliente.aviso(f"[erro] jogador pulado nesta semana: {recado} "
+                          f"| puuid de {len(puuid)} caracteres")
+            #"Exception decrypting" quer dizer que o puuid foi cifrado com
+            #outra chave, e nao que o jogador sumiu
+            if "decrypting" in recado.lower():
+                invalidos += 1
             ids = []
         if ids:
             antes = con.total_changes
@@ -304,7 +319,31 @@ def busca_ids(cliente: ClienteRiot, con: sqlite3.Connection, semana: int,
             (puuid, semana),
         )
     con.commit()
-    return len(linhas), novos
+    return len(linhas), novos, invalidos
+
+
+def resemeia(cliente: ClienteRiot, con: sqlite3.Connection,
+             log: logging.Logger) -> int:
+    """Refaz as sementes com puuids que a chave de agora decifra."""
+    #o puuid que a league-v4 devolve vem cifrado com a chave que o pediu, e a
+    #chave de desenvolvimento vira a cada 24 horas. depois de uma troca a
+    #Riot responde 400 "Exception decrypting" para todo puuid guardado, a
+    #coleta deixa de achar ID novo e o periodo congela. foi isso que parou a
+    #coleta em 23/11 as 14:52. os match_id ja guardados nao sao cifrados e
+    #continuam valendo, entao aqui so as sementes sao refeitas.
+    antes = con.execute("SELECT COUNT(*) FROM jogadores").fetchone()[0]
+    con.execute("DELETE FROM jogadores")
+    #as duas tabelas abaixo guardam puuid antigo, que nunca mais volta pela
+    #API: deixar as linhas la so engana a conta de jogador ja consultado
+    con.execute("DELETE FROM sementes_usadas")
+    con.execute("DELETE FROM paginas")
+    guarda(con, "cota_sementes", JOGADORES_POR_ELO)
+    con.commit()
+    log.info(f"[sementes] a chave de agora nao decifra os {antes} puuids "
+             "guardados, refazendo as sementes do zero")
+    novos = amplia_sementes(cliente, con, log, JOGADORES_POR_ELO)
+    log.info(f"[sementes] {novos} jogadores novos com a chave de agora")
+    return novos
 
 
 def garante_estoque(cliente: ClienteRiot, con: sqlite3.Connection,
@@ -314,9 +353,20 @@ def garante_estoque(cliente: ClienteRiot, con: sqlite3.Connection,
     while conta_ids(con, semana, "pendente") < alvo:
         if hora_de_parar(estado):
             return
-        consultados, novos = busca_ids(
+        consultados, novos, invalidos = busca_ids(
             cliente, con, semana, inicio, fim, LOTE_DE_JOGADORES
         )
+        if consultados and invalidos == consultados:
+            #nenhum dos consultados foi decifrado: isso e chave trocada, e
+            #nao jogador ruim. buscar mais semente antiga nao resolveria
+            if estado.get("resemeadas", 0) >= 3:
+                log.info("[sementes] ja refiz as sementes 3 vezes nesta "
+                         "execucao e a Riot continua recusando os puuids. "
+                         "paro de insistir nesta semana.")
+                return
+            estado["resemeadas"] = estado.get("resemeadas", 0) + 1
+            resemeia(cliente, con, log)
+            continue
         if consultados == 0:
             #acabaram os jogadores nao consultados, busca mais na API
             cota = int(valor(con, "cota_sementes", str(JOGADORES_POR_ELO)))
@@ -615,10 +665,17 @@ def main() -> int:
                  f"antes se a passada {argumentos.ate_passada} fechar")
 
     arquivo = open(PARTIDAS, "a", encoding="utf-8")
+    codigo_de_saida = 0
     try:
         coleta(cliente, con, log, arquivo, janelas, estado)
     except KeyboardInterrupt:
         log.info("Ctrl+C recebido, encerrando com o arquivo fechado.")
+    except Exception:
+        #sem isto o traceback ia somente para a tela da janela: a coleta de
+        #23/11 morreu as 14:52 e o log nao guardou o motivo, so o fim da
+        #rodada. o log e o que sobra depois que a janela fecha.
+        log.exception("a coleta parou por erro nao previsto")
+        codigo_de_saida = 1
     finally:
         arquivo.flush()
         arquivo.close()
@@ -633,7 +690,7 @@ def main() -> int:
                  f"{cliente.requisicoes} requisicoes.")
         con.close()
         trava.close()
-    return 0
+    return codigo_de_saida
 
 
 if __name__ == "__main__":

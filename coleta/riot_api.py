@@ -229,7 +229,20 @@ class ClienteRiot:
             codigo = resposta.status_code
 
             if codigo == 200:
-                return resposta.json()
+                try:
+                    return resposta.json()
+                except ValueError:
+                    #200 com corpo que nao e JSON e coisa de proxy ou de
+                    #pagina de erro no caminho, e nao resposta da Riot. isso
+                    #estourava para fora do laco e derrubava a coleta inteira.
+                    #aqui conta como falha de rede e tenta de novo.
+                    falhas_de_rede += 1
+                    espera = min(2 ** min(falhas_de_rede, 6),
+                                 ESPERA_MAXIMA_DE_REDE)
+                    self.aviso(f"[rede] 200 sem JSON na tentativa "
+                               f"{falhas_de_rede}, esperando {espera}s")
+                    time.sleep(espera)
+                    continue
             if codigo == 404:
                 return None
             if codigo == 429:
@@ -249,7 +262,33 @@ class ClienteRiot:
                            f"{falhas_da_riot}, esperando {espera}s")
                 time.sleep(espera)
                 continue
-            raise RuntimeError(f"HTTP {codigo} em {url}: {resposta.text[:300]}")
+            #codigo fora do previsto (400, 204, 3xx de proxy) subia como
+            #RuntimeError, e RuntimeError nao e ErroDaRiot: ninguem pegava,
+            #a coleta morria com o traceback na tela e o log nao guardava
+            #uma linha do motivo. agora tenta de novo algumas vezes e depois
+            #devolve ErroDaRiot, que o baixa_lote trata deixando a partida
+            #para a proxima execucao. a url nao entra na mensagem porque
+            #carrega puuid.
+            falhas_da_riot += 1
+            if falhas_da_riot > 3:
+                #a mensagem da Riot explica o motivo do 400, e so ela diz se
+                #o problema e o puuid ou o parametro. ela viaja na excecao e
+                #nao no log daqui, porque pode trazer o puuid dentro: quem
+                #chama conhece o puuid e troca por <puuid> antes de logar.
+                try:
+                    recado = ((resposta.json().get("status") or {})
+                              .get("message") or "")[:120]
+                except ValueError:
+                    recado = ""
+                if recado:
+                    raise ErroDaRiot(
+                        f"HTTP {codigo} inesperado tres vezes: {recado}")
+                raise ErroDaRiot(f"HTTP {codigo} inesperado tres vezes")
+            espera = 2 ** falhas_da_riot
+            self.aviso(f"[{codigo}] resposta inesperada, tentativa "
+                       f"{falhas_da_riot}, esperando {espera}s")
+            time.sleep(espera)
+            continue
 
 
 def intervalo(dia, dias: int) -> tuple[int, int]:

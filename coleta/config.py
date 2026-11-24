@@ -64,7 +64,7 @@ JANELA_DA_TAXA = 600
 #densidade, entao nao existe hora ruim para parar.
 #data absoluta de proposito: sobrevive a reinicio, ao contrario de contar
 #horas desde que o processo subiu.
-PARAR_EM = datetime(2026, 11, 25, 5, 0, tzinfo=FUSO)
+PARAR_EM = datetime(2026, 11, 25, 22, 0, tzinfo=FUSO)
 
 #passada em que a coleta encerra sozinha. a passada 3 so fecharia na sexta,
 #depois do prazo do trabalho, e parar no meio de uma passada deixa as semanas

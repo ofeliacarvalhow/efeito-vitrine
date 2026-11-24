@@ -22,6 +22,7 @@ import csv
 import os
 import sys
 import unicodedata
+from collections import Counter
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -447,10 +448,18 @@ def main() -> int:
               "maior do mesmo dia e sairam")
         print("")
 
+    #dois videos da mesma linha em datas diferentes davam o MESMO event_id, e
+    #a analise agrupa por event_id: o Pandemonio tinha trailer de Ato I em
+    #14/04 e de Ato II em 27/05, os dois saiam como trailer-pandemonio e um
+    #dos dois desaparecia da analise. onde o nome colide, a data entra nele.
+    nomes = Counter(f"{e['tipo']}-{nome_do_evento(e)}" for e in sobreviventes)
+
     for entrada in sorted(sobreviventes,
                           key=lambda e: (e["tipo"], e["quando"])):
         video = entrada["video"]
         identificador = f"{entrada['tipo']}-{nome_do_evento(entrada)}"
+        if nomes[identificador] > 1:
+            identificador = f"{identificador}-{entrada['quando']}"
         print(f"  [{entrada['tipo']}] {entrada['quando']}  "
               f"{identificador}")
         print(f"      {video['titulo'][:72]}")

@@ -1,0 +1,176 @@
+patch,patch_date,champion,change
+16.3,,Ahri,W cooldown 10/9/8/7/6 para 9/8/7/6/5
+16.3,,Belveth,hpperlevel 99 para 105
+16.3,,Braum,hp 630 para 610; Q efeito 1 75/125/175/225/275 para 75/120/165/210/255
+16.3,,Briar,armorperlevel 4.2 para 4.5; hpperlevel 95 para 100
+16.3,,Draven,attackdamageperlevel 3 para 3.4
+16.3,,Ezreal,attackdamageperlevel 3.25 para 3.75
+16.3,,Heimerdinger,hpperlevel 101 para 105
+16.3,,Kayn,Q efeito 1 75/100/125/150/175 para 75/105/135/165/195
+16.3,,Mel,Q custo 70/80/90/100/110 para 70/75/80/85/90; E cooldown 12/11.5/11/10.5/10 para 11/10.5/10/9.5/9
+16.3,,Nilah,armorperlevel 4.5 para 4.2; attackdamage 60 para 58
+16.3,,Trundle,armorperlevel 3.9 para 4.5; attackdamageperlevel 4 para 4.5
+16.3,,Tryndamere,attackdamageperlevel 4 para 4.5
+16.3,,Varus,armorperlevel 4.6 para 4
+16.3,,Vi,attackdamageperlevel 3 para 3.5; hpperlevel 99 para 105
+16.3,,Volibear,E cooldown 14 para 16
+16.3,,XinZhao,E efeito 3 40/45/50/55/60 para 40/50/60/70/80
+16.4,,Annie,E cooldown 12/11.5/11/10.5/10 para 10
+16.4,,Braum,R cooldown 120/100/80 para 130/115/100
+16.4,,Hwei,R cooldown 140/115/80 para 120/100/80
+16.4,,Jinx,armorperlevel 4.7 para 4.2
+16.4,,Kassadin,hpperlevel 119 para 113; E efeito 2 50/60/70/80/90 para 50/55/60/65/70
+16.4,,Kennen,R cooldown 120/100/80 para 120
+16.4,,Lux,mp 480 para 440; mpregen 7 para 9; Q cooldown 11/10.5/10/9.5/9 para 10; Q efeito 1 80/120/160/200/240 para 0; Q efeito 2 50 para 0; W cooldown 14/13/12/11/10 para 12/11.5/11/10.5/10; e mais 1 mudanca(s)
+16.4,,Mel,hpperlevel 93 para 99
+16.4,,Naafiri,hpregen 7.5 para 6.25; hpregenperlevel 0.7 para 0.6; Q custo 55/60/65/70/75 para 50/60/70/80/90; E custo 35 para 40
+16.4,,Qiyana,hpperlevel 121 para 115
+16.4,,Rumble,hp 655 para 640
+16.4,,Twitch,armorperlevel 4.2 para 4; hpperlevel 104 para 98
+16.4,,Xayah,Q custo 50 para 35; W cooldown 20/19/18/17/16 para 18/17/16/15/14; E custo 30 para 20
+16.4,,Zac,Q efeito 1 40/55/70/85/100 para 0; R efeito 1 150/250/350 para 0
+16.5,,Azir,hpperlevel 119 para 108
+16.5,,Khazix,movespeed 350 para 345
+16.5,,Lillia,R cooldown 140/120/100 para 150/130/110
+16.5,,Orianna,Q cooldown 6/5.25/4.5/3.75/3 para 7/6/5/4/3
+16.5,,Volibear,W custo 30/35/40/45/50 para 20/25/30/35/40; E custo 60 para 50
+16.6,,Azir,Q efeito 1 60/80/100/120/140 para 0; Q efeito 7 325 para 0
+16.6,,Lissandra,armorperlevel 4.9 para 4.2; Q cooldown 8/7/6/5/4 para 7/6/5/4/3
+16.6,,Olaf,attackspeed 0.694 para 0.72; Q efeito 1 80/125/170/215/260 para 0; Q efeito 2 30 para 0; Q efeito 3 2.5 para 3; Q efeito 4 1.5 para 0; Q efeito 5 800 para 0; e mais 2 mudanca(s)
+16.6,,Pyke,armor 43 para 37
+16.6,,Shen,Q efeito 7 120/140/160/180/200 para 100/125/150/175/200
+16.6,,Shyvana,armor 38 para 35; armorperlevel 4.55 para 4; attackdamage 66 para 62; attackrange 125 para 150; attackspeed 0.658 para 0.625; attackspeedperlevel 2.5 para 2; e mais 9 mudanca(s)
+16.6,,Skarner,Q custo 45 para 30
+16.7,,Azir,Q efeito 2 25 para 0
+16.7,,Cassiopeia,mp 450 para 480
+16.7,,Graves,attackdamage 68 para 66
+16.7,,Veigar,R cooldown 100/80/60 para 120/90/60
+16.8,,Karma,attackdamage 51 para 49; E custo 50/55/60/65/70 para 60/65/70/75/80
+16.8,,Lucian,E cooldown 18/17/16/15/14 para 16/15.5/15/14.5/14; E custo 40/30/20/10/0 para 32/24/16/8/0
+16.8,,Mel,W cooldown 35/32/29/26/23 para 38/35/33/29/26
+16.9,,Briar,hpperlevel 100 para 95
+16.9,,Elise,E efeito 5 1.6/1.8/2/2.2/2.4 para 0
+16.9,,JarvanIV,Q efeito 2 10/14/18/22/26 para 0; W efeito 2 15/20/25/30/35 para 0; E efeito 3 20/22.5/25/27.5/30 para 0
+16.9,,Nocturne,W efeito 1 60/70/80/90/100 para 30/35/40/45/50
+16.9,,Quinn,W efeito 3 20/25/30/35/40 para 0.2/0.25/0.3/0.35/0.4; E efeito 1 50 para 0.5
+16.9,,Shyvana,attackspeed 0.625 para 0.638; W cooldown 14/13.5/13/12.5/12 para 13/12/11/10/9; E cooldown 12/11.5/11/10.5/10 para 12/11/10/9/8
+16.9,,Trundle,W efeito 1 20/28/36/44/52 para 0.2/0.28/0.36/0.44/0.52; W efeito 2 30/45/60/75/90 para 0.3/0.45/0.6/0.75/0.9; W efeito 3 25 para 0.25
+16.9,,Varus,Q efeito 3 15 para 0.15; Q efeito 4 50 para 0.5; Q efeito 7 20 para -0.2; Q efeito 9 33 para 0.33
+16.9,,XinZhao,W efeito 7 1.5 para 0; E efeito 1 50/75/100/125/150 para 0; E efeito 2 -0.3 para 0; E efeito 3 40/50/60/70/80 para 0; E efeito 4 5 para 0; E efeito 6 0.5 para 0
+16.9,,Zeri,attackrange 500 para 550; E cooldown 22/21/20/19/18 para 24/22.5/21/19.5/18
+16.9,,Zilean,W efeito 2 10 para 0
+16.9,,Zoe,E cooldown 16/15/14/13/12 para 18/17/16/15/14
+16.10,,Anivia,armor 21 para 19; armorperlevel 4.5 para 4.1
+16.10,,Ashe,Q efeito 5 0.22/0.235/0.25/0.265/0.28 para 0; Q efeito 6 1.1/1.175/1.25/1.325/1.4 para 0
+16.10,,Galio,Q custo 70/75/80/85/90 para 60/65/70/75/80
+16.10,,LeeSin,W cooldown 12 para 7
+16.10,,Quinn,R custo 100/50/0 para 50/25/0
+16.10,,Shyvana,hpperlevel 100 para 95; W cooldown 13/12/11/10/9 para 13/12.25/11.5/10.75/10
+16.10,,Zac,Q efeito 2 8 para 0.08; W efeito 2 4 para 0.04; E efeito 2 4 para 0.04
+16.10,,Zoe,W efeito 9 30/40/50/60/70 para 0.3/0.4/0.5/0.6/0.7
+16.11,,Brand,armor 27 para 24
+16.11,,Kassadin,Q cooldown 10/9.5/9/8.5/8 para 9/8.5/8/7.5/7; W efeito 2 20 para 25
+16.11,,Nasus,E efeito 2 30/35/40/45/50 para -0.3/-0.35/-0.4/-0.45/-0.5
+16.11,,Smolder,attackdamage 60 para 58
+16.11,,Teemo,armorperlevel 4.95 para 4.5
+16.12,,Hwei,E cooldown 13/12.5/12/11.5/11 para 12/11.5/11/10.5/10
+16.12,,Jax,Q custo 65 para 50
+16.12,,Nocturne,Q efeito 2 65/110/155/200/245 para 65/105/145/185/225
+16.12,,Orianna,hp 585 para 565
+16.12,,Ryze,attackdamage 58 para 55; hp 645 para 620
+16.12,,Syndra,hp 563 para 583
+16.12,,Tristana,Q custo 30/35/40/45/50 para 15/20/25/30/35
+16.12,,XinZhao,W custo 60/55/50/45/40 para 60; E custo 50 para 60
+16.13,,Brand,mpregen 9 para 11; E custo 70/75/80/85/90 para 90
+16.13,,Cassiopeia,hpperlevel 104 para 98
+16.13,,Draven,E cooldown 18/17/16/15/14 para 16/15/14/13/12
+16.13,,Kaisa,W cooldown 22/20/18/16/14 para 20/18.5/17/15.5/14
+16.13,,Sion,W custo 65/70/75/80/85 para 75/80/85/90/95
+16.13,,Vex,E cooldown 13 para 12
+16.13,,Zaahen,W cooldown 16/15/14/13/12 para 14/13.5/13/12.5/12
+16.15,,Alistar,movespeed 330 para 335
+16.15,,Belveth,armor 32 para 28; armorperlevel 4.7 para 5; attackdamage 60 para 55; attackspeed 0.85 para 0.67; hp 610 para 580; hpperlevel 105 para 110; e mais 3 mudanca(s)
+16.15,,Caitlyn,W efeito 7 30 para 0; E efeito 1 80/130/180/230/280 para 0
+16.15,,Ekko,Q efeito 2 40/45/50/55/60 para -0.4/-0.45/-0.5/-0.55/-0.6
+16.15,,Lissandra,Q efeito 3 20/24/28/32/36 para -0.2/-0.24/-0.28/-0.32/-0.36
+16.15,,Locke,hp 655 para 620
+16.15,,Mordekaiser,E cooldown 18/16/14/12/10 para 16/14/12/10/8
+16.15,,Volibear,Q cooldown 14/13/12/11/10 para 12/11.5/11/10.5/10
+16.15,,Zac,armorperlevel 4.7 para 5.2; E cooldown 22/19/16/13/10 para 21/18/15/12/9
+16.15,,Zyra,W efeito 1 35 para 0.35; W efeito 2 100 para 1; R efeito 2 50 para 0.5
+16.16,,Akshan,spellblock 30 para 33; spellblockperlevel 1.3 para 1.1
+16.16,,Aphelios,spellblock 30 para 33; spellblockperlevel 1.3 para 1.1
+16.16,,Ashe,spellblock 30 para 33; spellblockperlevel 1.3 para 1.1
+16.16,,Belveth,hpperlevel 110 para 105
+16.16,,Caitlyn,spellblock 30 para 33; spellblockperlevel 1.3 para 1.1
+16.16,,Camille,mp 339 para 375; W cooldown 15/14/13/12/11 para 12/11.5/11/10.5/10
+16.16,,Corki,spellblock 30 para 33; spellblockperlevel 1.3 para 1.1
+16.16,,Draven,spellblock 30 para 33; spellblockperlevel 1.3 para 1.1
+16.16,,Ezreal,spellblock 30 para 33; spellblockperlevel 1.3 para 1.1
+16.16,,Graves,spellblock 30 para 33; spellblockperlevel 1.3 para 1.1
+16.16,,Jhin,spellblock 30 para 33; spellblockperlevel 1.3 para 1.1
+16.16,,Jinx,spellblock 30 para 33; spellblockperlevel 1.3 para 1.1
+16.16,,Kaisa,spellblock 30 para 33; spellblockperlevel 1.3 para 1.1
+16.16,,Kalista,spellblock 30 para 33; spellblockperlevel 1.3 para 1.1
+16.16,,Kindred,spellblock 30 para 33; spellblockperlevel 1.3 para 1.1
+16.16,,KogMaw,spellblock 30 para 33; spellblockperlevel 1.3 para 1.1
+16.16,,Lucian,spellblock 30 para 33; spellblockperlevel 1.3 para 1.1
+16.16,,Lulu,W efeito 7 20/22.5/25/27.5/30 para 0.2/0.225/0.25/0.275/0.3
+16.16,,MissFortune,spellblock 30 para 33; spellblockperlevel 1.3 para 1.1
+16.16,,Poppy,attackdamage 60 para 56; hpregen 8 para 9; mp 280 para 300; mpperlevel 40 para 45
+16.16,,Quinn,spellblock 30 para 33; spellblockperlevel 1.3 para 1.1
+16.16,,Samira,spellblock 30 para 33; spellblockperlevel 1.3 para 1.1
+16.16,,Senna,spellblock 30 para 33; spellblockperlevel 1.3 para 1.1
+16.16,,Sivir,spellblock 30 para 33; spellblockperlevel 1.3 para 1.1
+16.16,,Smolder,spellblock 30 para 33; spellblockperlevel 1.3 para 1.1
+16.16,,Tristana,spellblock 28 para 33; spellblockperlevel 1.3 para 1.1
+16.16,,Twitch,spellblock 30 para 33; spellblockperlevel 1.3 para 1.1
+16.16,,Varus,spellblock 30 para 33; spellblockperlevel 1.3 para 1.1
+16.16,,Vayne,spellblock 30 para 33; spellblockperlevel 1.3 para 1.1
+16.16,,Xayah,spellblock 30 para 33; spellblockperlevel 1.3 para 1.1
+16.16,,Yunara,spellblock 30 para 33; spellblockperlevel 1.3 para 1.1
+16.16,,Zed,W efeito 2 0.2 para 0
+16.16,,Zeri,spellblock 30 para 33; spellblockperlevel 1.3 para 1.1
+16.17,2026-09-04,AurelionSol,Q custo 35/40/45/50/55 para 30/35/40/45/50; W cooldown 22/20.5/19/17.5/16 para 22/20/18/16/14
+16.17,2026-09-04,Leblanc,attackspeedperlevel 2.35 para 1.5
+16.17,2026-09-04,Nocturne,armor 38 para 36; hp 655 para 640
+16.17,2026-09-04,Vayne,attackspeedperlevel 3.3 para 2.8; hp 550 para 580; hpperlevel 103 para 98; hpregen 3.5 para 4; hpregenperlevel 0.55 para 0.5; Q custo 30 para 46/42/38/34/30
+16.17,2026-09-04,Xerath,hp 596 para 575; Q efeito 1 75/115/155/195/235 para 70/110/150/190/230
+16.18,2026-09-10,Bard,armor 34 para 32; armorperlevel 5 para 4.7
+16.18,2026-09-10,Cassiopeia,Q efeito 1 75/110/145/180/215 para 65/100/135/170/205; E custo 40 para 45
+16.18,2026-09-10,Ekko,Q custo 50/60/70/80/90 para 40/50/60/70/80
+16.18,2026-09-10,MasterYi,armorperlevel 4.5 para 5
+16.18,2026-09-10,Nautilus,attackdamage 61 para 58
+16.18,2026-09-10,Seraphine,E cooldown 11/10.5/10/9.5/9 para 11
+16.18,2026-09-10,Syndra,W cooldown 12/11/10/9/8 para 13/12/11/10/9
+16.19,2026-09-23,Aatrox,W cooldown 20/18/16/14/12 para 18/16.5/15/13.5/12
+16.19,2026-09-23,Draven,attackdamage 62 para 64
+16.19,2026-09-23,Elise,R efeito 2 12/22/32/42 para 14/24/34/44
+16.19,2026-09-23,Fiora,hpperlevel 99 para 105
+16.19,2026-09-23,Khazix,W efeito 4 2 para 2.25; W efeito 6 2 para 2.25
+16.19,2026-09-23,Lillia,armor 22 para 24
+16.19,2026-09-23,Nocturne,R cooldown 140/115/90 para 160/130/100
+16.19,2026-09-23,Ryze,armorperlevel 4.2 para 4.7; E custo 35/45/55/65/75 para 40/50/60/70/80
+16.19,2026-09-23,Vi,attackdamage 63 para 61
+16.20,2026-10-07,Cassiopeia,hp 630 para 610; mp 480 para 450
+16.20,2026-10-07,KSante,W custo 40/45/50/55/60 para 45/50/55/60/65
+16.20,2026-10-07,Mordekaiser,R cooldown 140/120/100 para 120/110/100
+16.20,2026-10-07,Swain,armor 25 para 23; spellblock 31 para 34; W cooldown 22/21/20/19/18 para 20/19/18/17/16
+16.20,2026-10-07,Vayne,hpregen 4 para 5.5; hpregenperlevel 0.5 para 0.4; Q custo 46/42/38/34/30 para 30
+16.21,2026-10-21,Azir,mpperlevel 40 para 50
+16.21,2026-10-21,Darius,Q cooldown 9/8/7/6/5 para 9/7.75/6.5/5.25/4
+16.21,2026-10-21,Jinx,hp 630 para 610
+16.21,2026-10-21,LeeSin,W cooldown 7 para 8
+16.21,2026-10-21,Locke,mpperlevel 70 para 60; W custo 50/55/60/65/70 para 60/65/70/75/80
+16.21,2026-10-21,MonkeyKing,hpregen 3.5 para 5.5
+16.21,2026-10-21,Sion,hpperlevel 87 para 95
+16.21,2026-10-21,Viktor,movespeed 335 para 330
+16.22,2026-11-04,Kayle,Q cooldown 12/11/10/9/8 para 10/9.5/9/8.5/8; R cooldown 160/120/80 para 140/110/80
+16.22,2026-11-04,Mel,armorperlevel 5.2 para 5.4; attackdamage 54 para 52; attackspeedperlevel 2.5 para 2.75; hp 630 para 590; hpperlevel 99 para 107; mp 480 para 455; e mais 6 mudanca(s)
+16.22,2026-11-04,Thresh,attackdamage 56 para 54; R efeito 1 250/400/550 para 0
+16.22,2026-11-04,Viktor,hpperlevel 100 para 105
+16.22,2026-11-04,Zaahen,Q cooldown 10/9/8/7/6 para 8/7.5/7/6.5/6
+16.23,2026-11-18,Azir,attackrange 525 para 550
+16.23,2026-11-18,KSante,W custo 45/50/55/60/65 para 45
+16.23,2026-11-18,Syndra,E cooldown 15 para 17/16.5/16/15.5/15; E custo 50 para 60
+16.23,2026-11-18,Velkoz,R efeito 1 450/700/925 para 450/700/950

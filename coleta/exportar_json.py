@@ -24,7 +24,9 @@ from pathlib import Path
 from config import DATA_FINAL, DATA_INICIAL, FUSO, RAIZ
 
 PROCESSADOS = RAIZ / "data" / "processed"
-SAIDA = RAIZ / "site" / "dados"
+#o Streamlit da Pessoa 3 le de site/dados, e o painel estatico
+#le de painel/dados. os dois recebem os mesmos arquivos
+SAIDAS = [RAIZ / "site" / "dados", RAIZ / "painel" / "dados"]
 
 
 def ler(nome: str) -> list[dict]:
@@ -36,16 +38,17 @@ def ler(nome: str) -> list[dict]:
 
 
 def grava(nome: str, conteudo) -> int:
-    SAIDA.mkdir(parents=True, exist_ok=True)
-    alvo = SAIDA / nome
-    parcial = SAIDA / (nome + ".parcial")
     #separador sem espaco para o arquivo nao inchar a toa
-    parcial.write_text(
-        json.dumps(conteudo, ensure_ascii=False, separators=(",", ":")),
-        encoding="utf-8",
-    )
-    os.replace(parcial, alvo)
-    return alvo.stat().st_size
+    texto = json.dumps(conteudo, ensure_ascii=False, separators=(",", ":"))
+    tamanho = 0
+    for saida in SAIDAS:
+        saida.mkdir(parents=True, exist_ok=True)
+        alvo = saida / nome
+        parcial = saida / (nome + ".parcial")
+        parcial.write_text(texto, encoding="utf-8")
+        os.replace(parcial, alvo)
+        tamanho = alvo.stat().st_size
+    return tamanho
 
 
 def monta_serie() -> dict:
@@ -119,6 +122,20 @@ def monta_patches() -> list[dict]:
     ]
 
 
+def quando_agregou() -> str:
+    """Quando o daily_pickrate.csv foi escrito pela ultima vez.
+
+    O `gerado_em` diz a hora em que este JSON saiu, que pode ser horas
+    depois da agregacao. O painel precisa mostrar a data DO DADO, senao
+    alguem apresenta numero velho acreditando que e de agora.
+    """
+    caminho = PROCESSADOS / "daily_pickrate.csv"
+    if not caminho.exists():
+        return ""
+    quando = datetime.fromtimestamp(caminho.stat().st_mtime, tz=FUSO)
+    return quando.isoformat(timespec="seconds")
+
+
 def monta_resumo(serie: dict, eventos: list[dict]) -> dict:
     partidas = sum(serie.get("partidas_por_dia") or [0])
     dias = len(serie.get("dias") or [])
@@ -127,6 +144,7 @@ def monta_resumo(serie: dict, eventos: list[dict]) -> dict:
         tipos[evento["tipo"]] = tipos.get(evento["tipo"], 0) + 1
     return {
         "gerado_em": datetime.now(FUSO).isoformat(timespec="seconds"),
+        "dados_de": quando_agregou(),
         "periodo": {"de": DATA_INICIAL.isoformat(),
                     "ate": DATA_FINAL.isoformat(), "dias": dias},
         "partidas": partidas,
@@ -157,7 +175,8 @@ def main() -> int:
         ("resumo.json", monta_resumo(serie, eventos)),
     ]
     total = 0
-    print(f"{SAIDA.relative_to(RAIZ)}:")
+    print(", ".join(s.relative_to(RAIZ).as_posix()
+                    for s in SAIDAS) + ":")
     for nome, conteudo in arquivos:
         tamanho = grava(nome, conteudo)
         total += tamanho

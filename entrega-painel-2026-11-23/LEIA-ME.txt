@@ -1,0 +1,64 @@
+EFEITO VITRINE: ENTREGA PARA O PAINEL
+retrato de 23 de novembro de 2026, 10h47, fuso America/Sao_Paulo
+
+
+O QUE TEM AQUI
+
+Efeito-Vitrine-painel-especificacao.docx
+    O documento. Estado completo do projeto e especificacao das telas do
+    painel, com 13 sugestoes de visualizacao. Times New Roman, letra preta.
+
+dados/
+    daily_pickrate.csv      a serie diaria, 46364 linhas
+    events.csv              os 60 eventos, uma linha por campeao
+    new_skins.csv           os 97 lancamentos de skin
+    patch_dates.csv         os 20 patches, com data medida nas partidas
+    balance_changes.csv     as 175 mudancas de balanceamento
+    resultados_por_campeao_evento.csv
+                            a analise pronta: lift, percentil, intervalo e
+                            destaque de cada par de campeao e evento
+
+json/
+    os cinco arquivos que o painel busca com fetch, sem backend
+
+analise-relatorio-completo.txt
+    o relatorio da analise, evento por evento, com o placebo no fim
+
+qualidade-da-amostra.txt
+    partidas dia por dia, versoes do jogo por semana, e os avisos de leitura
+
+gerar_documento.py
+gerar_csv_resultados.py
+    os dois geradores. Rodar de novo depois de atualizar dados/ refaz o
+    documento e o CSV de resultados com os numeros novos.
+
+
+POR QUE ESTE INSTANTE
+
+A coleta estava em 137520 partidas, na passada 2 de 3, e encerra na
+madrugada de quarta, 25 de novembro. O rodizio de semanas mantem a amostra
+parelha a todo momento, entao este retrato e proporcional em todo o
+periodo: as medias mensais vao de 497 a 528 partidas por dia.
+
+Depois que a coleta terminar, rode na raiz do projeto, nesta ordem:
+
+    .venv\Scripts\python.exe coleta\agregar.py
+    .venv\Scripts\python.exe coleta\qualidade.py
+    .venv\Scripts\python.exe eventos\montar_eventos.py
+    .venv\Scripts\python.exe analise\efeito_vitrine.py
+    .venv\Scripts\python.exe coleta\exportar_json.py
+
+e depois refaca esta pasta com os dois geradores daqui.
+
+
+O NUMERO PRINCIPAL
+
+60 de 74 campeoes que receberam skin nova ficaram acima do comportamento
+tipico do servidor, com chance de 0.000 de isso acontecer por acaso. O
+campeao tipico com skin nova foi escolhido 18 por cento mais vezes na
+semana seguinte.
+
+Clipe musical da 11 de 16, com chance 0.105: mesma direcao, amostra pequena.
+Trailer e exposicao nao mostram sinal.
+
+As limitacoes estao na secao 11 do documento e nao devem sair do painel.

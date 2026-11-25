@@ -24,8 +24,8 @@ from pathlib import Path
 from config import DATA_FINAL, DATA_INICIAL, FUSO, RAIZ
 
 PROCESSADOS = RAIZ / "data" / "processed"
-#o Streamlit da Pessoa 3 le de site/dados, e o painel estatico
-#le de painel/dados. os dois recebem os mesmos arquivos
+#o Streamlit le de site/dados e o painel estatico le de painel/dados.
+#os dois recebem os mesmos arquivos
 SAIDAS = [RAIZ / "site" / "dados", RAIZ / "painel" / "dados"]
 
 

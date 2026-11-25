@@ -40,7 +40,7 @@ PY = RAIZ / ".venv" / "Scripts" / "python.exe"
 if not PY.exists():
     PY = RAIZ / ".venv" / "bin" / "python"
 
-ENTREGA = RAIZ / "entrega-painel-2026-11-23"
+ENTREGA = RAIZ / "entrega"
 PROCESSADOS = RAIZ / "data" / "processed"
 PAINEL = RAIZ / "painel" / "dados"
 STARTUP = (Path(os.environ.get("APPDATA", "")) / "Microsoft" / "Windows" /
@@ -108,18 +108,29 @@ def trava_esta_tomada() -> bool:
 
 
 def log_mexido_agora(minutos: float = 5.0) -> bool:
-    """True se o log da coleta mudou ha pouco.
+    """True se o log da coleta mudou ha pouco e nao foi para se despedir.
 
     Segunda checagem, independente da trava. A primeira versao deste script
     confiou numa trava so, ela respondeu errado, e o ciclo inteiro rodou em
     cima de um matches.jsonl que estava sendo escrito. Dois sinais custam
     nada e cobrem um ao outro.
+
+    O coletor escreve "fim desta rodada" no finally, depois de dar flush no
+    arquivo e commit no banco. Quando essa e a ultima linha, o log acabou de
+    mudar justamente porque a coleta terminou, e esperar cinco minutos seria
+    so atraso.
     """
     log = RAIZ / "coleta" / "coletar.log"
     if not log.exists():
         return False
     idade = datetime.now().timestamp() - log.stat().st_mtime
-    return idade < minutos * 60
+    if idade >= minutos * 60:
+        return False
+    ultimas = log.read_text(encoding="utf-8", errors="replace").splitlines()
+    for linha in reversed(ultimas[-5:]):
+        if "fim desta rodada" in linha:
+            return False
+    return True
 
 
 def coletor_vivo() -> tuple[bool, str]:

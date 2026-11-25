@@ -404,7 +404,7 @@ def monta_dicionario(bruto: dict, pickrate: dict) -> str:
         "",
         "O Data Dragon sai dias depois do patch, entao `version` diz qual "
         "patch trouxe a skin, nao quando ela saiu. A data oficial do patch "
-        "entra em `balance_changes.csv`, preenchida pela Pessoa 3.",
+        "entra em `balance_changes.csv`, preenchida a mao.",
         "",
         "Para esse preenchimento, o `qualidade.txt` ja traz a data de cada "
         "patch **medida nas partidas do BR1**: o dia em que a versao nova "

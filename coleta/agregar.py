@@ -7,8 +7,8 @@ escreve contem jogador, puuid ou matchId.
 
 Pode rodar com o coletor rodando. Le o arquivo linha por linha, descarta
 matchId repetido e a ultima linha caso o coletor a tenha deixado pela metade,
-e grava o CSV num arquivo temporario antes de trocar pelo definitivo, para a
-Pessoa 2 nunca ler um CSV incompleto.
+e grava o CSV num arquivo temporario antes de trocar pelo definitivo, para
+que a analise nunca leia um CSV incompleto.
 
 Rodar:  .venv/Scripts/python.exe coleta/agregar.py
 """

@@ -7,7 +7,7 @@ data/processed/new_skins.csv.
 
 O Data Dragon sai dias depois do patch, entao a coluna version diz QUAL patch
 trouxe a skin, nao QUANDO ela saiu. A data oficial de cada patch vem de outra
-fonte e quem preenche e a Pessoa 3, em data/processed/balance_changes.csv.
+fonte e entra a mao em data/processed/balance_changes.csv.
 
 O cache fica em data/cache_ddragon/, fora do Git. Rodar de novo com o cache
 cheio nao faz requisicao nenhuma.
@@ -239,7 +239,7 @@ def main() -> int:
     print(f"comparacao: {PATCH_BASE} entrou so como base do {PATCHES[0]} "
           "e nao gera linha propria.")
     print("a coluna version diz qual patch trouxe a skin. a data oficial do "
-          "patch vem de outra fonte, que a Pessoa 3 preenche.")
+          "patch vem de outra fonte, preenchida a mao.")
     print("croma nao entra neste arquivo: ele e descartado na comparacao, "
           "nao so no resultado, porque o Data Dragon so comecou a listar "
           "croma no 16.6 e isso criaria 6717 skins falsas naquele patch.")

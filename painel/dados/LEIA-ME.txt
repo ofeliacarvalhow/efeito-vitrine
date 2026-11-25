@@ -1,32 +1,22 @@
-OS JSON DO PAINEL
-pasta entregue pela Pessoa 1, coleta
+OS NOVE JSON DO PAINEL
 
 
-O QUE E ESTA PASTA
+O painel busca estes arquivos com fetch e desenha a partir deles. A Vercel
+serve estatico e nao roda Python, entao o painel nao le os CSV de
+data/processed: le daqui.
 
-Os nove arquivos que o painel busca com fetch. A Vercel serve estatico e nao
-roda Python, entao o painel nao le os CSV de data/processed: le daqui.
-
-Nenhum numero daqui e conta nova. Os cinco primeiros arquivos saem da coleta
-agregada, e os quatro de resultado saem das proprias funcoes de
-analise/efeito_vitrine.py, entao eles batem com analise/relatorio.txt. O
-painel nao precisa recalcular janela, percentil nem placebo, e nao deveria:
-refazer essa conta no navegador e o caminho mais curto para a tela mostrar um
-numero diferente do que o trabalho escrito afirma.
+Nenhum numero aqui e conta nova. Os cinco primeiros saem da coleta agregada
+e os quatro de resultado saem das proprias funcoes de
+analise/efeito_vitrine.py, entao eles batem com analise/relatorio.txt.
 
 
-AS DUAS DATAS, QUE NAO SAO A MESMA COISA
+A DATA DO RETRATO
 
-Todo arquivo em formato de objeto traz os dois campos:
+Todo arquivo em formato de objeto traz dois campos de data:
 
-  dados_de    quando a coleta foi agregada. e ESTA que vale como data do
-              retrato, e e esta que precisa aparecer em toda tela
-  gerado_em   quando este JSON foi escrito, que pode ser horas depois
-
-Neste momento as duas estao longe uma da outra de proposito: o dado foi
-agregado em 23/11 as 10:43 e os JSON sairam em 24/11, porque a coleta ainda
-estava rodando e o agregar.py nao foi rodado de novo. Mostrar gerado_em como
-data do retrato faria o painel parecer mais novo do que e.
+    dados_de    quando a coleta foi agregada. e esta que vale como data do
+                retrato, e e esta que precisa aparecer em toda tela
+    gerado_em   quando este JSON foi escrito, que pode ser horas depois
 
 serie.json, eventos.json, patches.json e balanceamento.json nao tem os
 campos, porque sao listas. A data deles e a do resumo.json.
@@ -34,9 +24,9 @@ campos, porque sao listas. A data deles e a do resumo.json.
 
 OS ARQUIVOS
 
-resumo.json         os numeros da abertura: 137520 partidas, 268 dias, 173
+resumo.json         os numeros da abertura: 172.678 partidas, 268 dias, 173
                     campeoes, 60 eventos por tipo, e o aviso da amostra
-serie.json          a serie diaria em listas paralelas, 140 KB
+serie.json          a serie diaria em listas paralelas, 142 KB
 eventos.json        os 60 eventos, com os campeoes de cada um dentro
 patches.json        os 20 patches, com data medida nas partidas
 balanceamento.json  as 175 mudancas de balanceamento
@@ -44,8 +34,8 @@ balanceamento.json  as 175 mudancas de balanceamento
 resultados.json     os 133 pares de campeao e evento, com taxa de antes e
                     depois, lift, pico, percentil contra o controle e
                     intervalo de confianca
-tipos.json          o teste agrupado por tipo, que e o numero que o trabalho
-                    conclui, com intervalo de Wilson e a chance
+tipos.json          o teste agrupado por tipo nas duas medidas, com
+                    intervalo de Wilson e a chance
 placebo.json        as 200 contagens com data sorteada e a contagem real
 controle.json       a distribuicao do grupo de controle em cada data de
                     evento, que e o fundo do histograma de cada campeao
@@ -53,8 +43,8 @@ controle.json       a distribuicao do grupo de controle em cada data de
 
 COMO LER A SERIE
 
-Ela vem como listas paralelas, e nao como um objeto por linha, e e so por
-isso que ela caber em 140 KB em vez de alguns megabytes.
+Ela vem como listas paralelas, e por isso cabe em 142 KB em vez de alguns
+megabytes.
 
     escolhas[campeao][i]  escolhas do campeao no dia dias[i]
     partidas_por_dia[i]   partidas da AMOSTRA naquele dia
@@ -75,39 +65,38 @@ Entao o histograma e a seta saem do mesmo numero, e a seta nao precisa ser
 posicionada por conta. destaque e percentil_do_pico igual ou acima de 90.
 
 controle.json tem 56 eventos e nao 60. Os outros quatro caem perto da borda
-do periodo e nao sobra janela para montar grupo de controle, e os pares deles
-tambem nao aparecem em resultados.json.
+do periodo e nao sobra janela para montar grupo de controle, e os pares
+deles tambem nao aparecem em resultados.json.
+
+
+AS DUAS MEDIDAS EM tipos.json
+
+Os campos de cima de cada tipo usam o percentil do pico de tres dias, que e
+a medida do relatorio. O bloco pelo_lift traz a mesma conta pela media de
+sete dias, a medida conservadora. As duas nao concordam em trailer, entao o
+painel mostra a que o texto do trabalho adotar, e o bloco medida no topo do
+arquivo diz qual criterio e qual.
 
 
 O QUE NAO PODE SAIR DE PERTO DO NUMERO
 
-  o aviso do resumo.json: a amostra da peso igual aos dez elos, de Ferro a
-  Challenger, enquanto a populacao real e quase toda de elo baixo. a taxa
-  daqui nao e a taxa do servidor
+O aviso do resumo.json: a amostra da peso igual aos dez elos, de Ferro a
+Challenger, enquanto a populacao real e quase toda de elo baixo.
 
-  pouca_amostra em resultados.json marca campeao com menos de 100 escolhas na
-  janela de antes. em campeao pouco escolhido meia duzia de escolhas a mais
-  ja vira lift de duas vezes, e esse numero nao deve ser lido sozinho
+pouca_amostra em resultados.json marca campeao com menos de 100 escolhas na
+janela de antes. Em campeao pouco escolhido, meia duzia de escolhas a mais
+ja vira lift de duas vezes.
 
-  sobrepostos em tipos.json conta as linhas que tem evento de OUTRO tipo do
-  mesmo campeao dentro da janela. clipe e trailer do mesmo lancamento saem
-  com poucos dias de diferenca e medem quase o mesmo pedaco da serie, entao
-  nesses casos um tipo nao e evidencia independente do outro
+sobrepostos em tipos.json conta as linhas que tem evento de OUTRO tipo do
+mesmo campeao dentro da janela.
 
 
-COMO REFAZER ESTA PASTA
+COMO REFAZER
 
-Na raiz do projeto, nesta ordem, com o ambiente virtual ativado:
+Da raiz do projeto:
 
-    .venv\Scripts\python.exe coleta\agregar.py
-    .venv\Scripts\python.exe coleta\qualidade.py
-    .venv\Scripts\python.exe eventos\montar_eventos.py
-    .venv\Scripts\python.exe analise\efeito_vitrine.py
-    .venv\Scripts\python.exe coleta\exportar_json.py
-    .venv\Scripts\python.exe coleta\exportar_json_resultados.py
+    .venv\Scripts\python.exe coleta\fechar_coleta.py
 
-O exportar_json.py escreve aqui e tambem em site/dados, que e de onde o
-Streamlit da Pessoa 3 le. O exportar_json_resultados.py roda o placebo de
-200 repeticoes e leva cerca de 40 segundos.
-
-Esta pasta e um retrato. Rode de novo depois que a coleta encerrar.
+O exportar_json.py escreve aqui e tambem em site/dados, de onde o Streamlit
+le. O exportar_json_resultados.py roda o placebo de 200 repeticoes e leva
+cerca de 40 segundos.

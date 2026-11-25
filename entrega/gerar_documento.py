@@ -6,7 +6,7 @@ mao, para o documento nao envelhecer em silencio quando a coleta avancar.
 Rodar de novo depois de atualizar a pasta dados/ regenera o documento com os
 numeros novos.
 
-Rodar:  .venv\\Scripts\\python.exe entrega-painel-2026-11-23\\gerar_documento.py
+Rodar:  .venv\\Scripts\\python.exe entrega\\gerar_documento.py
 """
 from __future__ import annotations
 
@@ -475,7 +475,7 @@ doc.add_page_break()
 
 h("4. O contrato de dados", 1)
 p("Cinco arquivos. O painel le estes mesmos dados, convertidos para JSON. "
-  "Qualquer mudanca de coluna quebra o trabalho das outras pessoas, e por "
+  "Qualquer mudanca de coluna quebra o trabalho que depende deles, e por "
   "isso o contrato e combinado antes de ser alterado.")
 
 h("4.1. daily_pickrate.csv", 2)
@@ -1127,12 +1127,17 @@ p("A serie vem como listas paralelas, e nao como um objeto por linha, e e "
 p("Como sao arquivos estaticos, eles sao um retrato. O exportador precisa "
   "rodar de novo sempre que a coleta avancar, e a data do retrato deve "
   "aparecer na tela, para ninguem apresentar numero velho sem saber.")
-p("Falta um sexto arquivo, e ele e o que o painel mais vai usar nas telas "
-  "de resultado: a tabela de resultados por campeao e evento, que nesta "
-  "entrega esta em dados/resultados_por_campeao_evento.csv e descrita na "
-  "secao 4.6. Converter esse CSV para JSON e tarefa pequena, e sem ele cada "
-  "tela de resultado teria que refazer a conta de janela e de percentil no "
-  "navegador, com risco de divergir do relatorio.")
+p("Alem dos cinco arquivos de dado cru, o painel recebe quatro de "
+  "resultado, e sao eles que sustentam as telas de resultado. "
+  "resultados.json tem a tabela por campeao e por evento descrita na secao "
+  "4.6, a mesma do CSV desta pasta. tipos.json tem o teste agrupado nas "
+  "duas medidas. placebo.json tem as 200 contagens do sorteio e a real. "
+  "controle.json tem a distribuicao do grupo de controle em cada data de "
+  "evento, que e o fundo do histograma da tela 13.4.")
+p("Com esses quatro, nenhuma tela precisa refazer conta de janela, de "
+  "percentil ou de placebo no navegador, e por isso nenhuma corre o risco "
+  "de mostrar numero diferente do relatorio. Os nove arquivos ficam em "
+  "painel/dados, na raiz do projeto, com LEIA-ME proprio.")
 
 h("12.1. O que o painel nao deve calcular sozinho", 2)
 p("Vale separar o que o navegador pode fazer do que precisa vir pronto, "
@@ -1374,20 +1379,17 @@ doc.add_page_break()
 
 #-------------------------------------------------------------- 14
 
-h("14. O que falta", 1)
+h("14. Onde o trabalho esta", 1)
 
-h("14.1. Pessoa 1, coleta", 2)
-lista([
-    "deixar a coleta terminar na madrugada de quarta, 25 de novembro, e "
-    "rodar o ciclo completo de agregacao, qualidade, eventos, analise e "
-    "exportacao uma ultima vez",
-    "remover o atalho de religar da pasta de inicializacao do Windows "
-    "quando a coleta acabar",
-    "entregar a pasta de JSON final para quem monta o painel, com a data do "
-    "retrato",
-])
+h("14.1. A coleta, encerrada", 2)
+p("A coleta encerrou em 25 de novembro ao meio-dia, no horario marcado, e "
+  "fechou o ciclo completo de agregacao, qualidade, catalogo de eventos, "
+  "analise e exportacao. O que ela deixou pronto esta descrito na secao 12: "
+  "nove arquivos JSON que o painel busca, mais os CSV e o relatorio.")
+p("O atalho que religava o coletor saiu da pasta de inicializacao do "
+  "Windows, entao a maquina nao volta a coletar sozinha num reinicio.")
 
-h("14.2. Pessoa 2, eventos e analise", 2)
+h("14.2. O catalogo e a analise", 2)
 lista([
     "revisar o catalogo de eventos a olho, porque o casamento por texto "
     "acerta o essencial e erra nos casos de borda",
@@ -1399,18 +1401,17 @@ lista([
     "mostra do que o dado sugere",
 ])
 
-h("14.3. Pessoa 3, painel", 2)
-lista([
-    "montar as cinco primeiras telas da secao 13, que sao as que sustentam "
-    "o argumento",
-    "colocar a data do retrato visivel em toda tela",
-    "carregar as limitacoes da secao 11 numa pagina propria, linkada do "
-    "topo",
-    "conferir o painel no celular antes da apresentacao",
-])
+h("14.3. O painel", 2)
+p("O painel le os nove arquivos de painel/dados com fetch e vai para a "
+  "Vercel como site estatico, sem backend. As cinco primeiras telas da "
+  "secao 13 sao as que sustentam o argumento, e as outras oito servem para "
+  "explorar. A data do retrato aparece em toda tela, e as limitacoes da "
+  "secao 11 tem pagina propria, linkada do topo.")
+p("Falta conferir o painel no celular antes da apresentacao, porque e nele "
+  "que o trabalho vai ser mostrado.")
 
 h("14.4. Decisao que ainda nao foi tomada", 2)
-p("Falta combinar entre as tres pessoas se o trabalho conclui sobre clipe "
+p("Falta combinar se o trabalho conclui sobre clipe "
   "musical ou se limita a conclusao a skin. O dado atual sustenta a "
   "afirmacao sobre skin com folga. Sobre clipe, a direcao e a mesma e a "
   f"amostra de {por_extenso(POR_TIPO['clipe'])} videos nao fecha. A escolha "

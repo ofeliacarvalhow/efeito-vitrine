@@ -1,7 +1,7 @@
 # Segredos
 .env
 
-# Dados brutos: ficam APENAS no computador da Pessoa 1
+# Dados brutos: ficam APENAS na maquina que rodou a coleta
 data/raw/
 
 # Python

@@ -7,7 +7,7 @@ que chama as proprias funcoes de analise/efeito_vitrine.py, entao os numeros
 daqui sao os mesmos do relatorio e os mesmos do JSON do painel, sem conta
 repetida em outro lugar para divergir depois.
 
-Rodar:  .venv\Scripts\python.exe entrega-painel-2026-11-23\gerar_csv_resultados.py
+Rodar:  .venv\Scripts\python.exe entrega\gerar_csv_resultados.py
 """
 from __future__ import annotations
 

@@ -1,0 +1,96 @@
+EFEITO VITRINE
+o pacote fechado, com a coleta encerrada
+
+
+Sessenta e um campeoes de setenta e quatro que ganharam skin nova foram
+escolhidos mais vezes na semana seguinte do que o campeao tipico do servidor
+no mesmo periodo. A chance de isso acontecer por acaso e 0,000.
+
+A coleta encerrou em 25 de novembro de 2026 ao meio-dia, com 172.678
+partidas da fila 420 no servidor brasileiro, media de 644 por dia, entre 24
+de fevereiro e 18 de novembro. Sao 268 dias, 173 campeoes e 60 eventos
+catalogados.
+
+
+O QUE TEM AQUI
+
+Efeito-Vitrine-painel-especificacao.docx
+    O documento. Estado do projeto, metodologia, resultados e a
+    especificacao das treze telas do painel. Times New Roman, letra preta.
+
+dados/
+    daily_pickrate.csv      a serie diaria, 46.364 linhas
+    events.csv              os 60 eventos, uma linha por campeao
+    new_skins.csv           os 97 lancamentos de skin
+    patch_dates.csv         os 20 patches, com data medida nas partidas
+    balance_changes.csv     as 175 mudancas de balanceamento
+    resultados_por_campeao_evento.csv
+                            a analise pronta, 133 pares, com lift,
+                            percentil, intervalo e destaque
+
+analise-relatorio-completo.txt
+    o relatorio da analise, evento por evento, com o placebo no fim
+
+qualidade-da-amostra.txt
+    partidas dia por dia, versoes do jogo por semana e os avisos de leitura
+
+gerar_documento.py
+gerar_csv_resultados.py
+    os dois geradores. Depois de atualizar dados/, rodar os dois refaz o
+    documento e o CSV com os numeros novos.
+
+
+OS JSON DO PAINEL NAO ESTAO AQUI
+
+O painel le nove arquivos JSON, e eles ficam em painel/dados, na raiz do
+projeto, com LEIA-ME proprio. Esta pasta guarda os CSV e o documento.
+
+Alem dos cinco arquivos de dado cru, painel/dados tem resultados.json com os
+133 pares medidos, tipos.json com o teste agrupado, placebo.json com as 200
+contagens do sorteio e controle.json com a distribuicao do grupo de controle
+em cada data de evento.
+
+
+O RESULTADO
+
+    tipo         acima do tipico    chance
+    skin             61 de 74        0,000
+    trailer          13 de 19        0,084
+    clipe            11 de 16        0,105
+    exposicao        14 de 24        0,271
+
+Esses numeros usam o percentil do pico de tres dias. Pela media de sete
+dias, que e a medida conservadora, a skin da 60 de 74 e o trailer da 12 de
+19 com chance 0,180. As duas contagens estao lado a lado na secao 9.5 do
+documento e em tipos.json, e qual delas o trabalho adota e a decisao da
+secao 14.4.
+
+O teste de placebo repetiu a medida inteira 200 vezes com a data de cada
+evento sorteada. Com datas verdadeiras o metodo marcou 22 momentos; com
+datas sorteadas, media de 9,7, e nenhum dos 200 sorteios chegou a 22.
+
+
+COMO REFAZER ESTA PASTA
+
+Da raiz do projeto, com o ambiente virtual ativado:
+
+    .venv\Scripts\python.exe coleta\fechar_coleta.py
+
+Ele roda o ciclo inteiro em onze passos, atualiza esta pasta e para na hora
+se algum passo falhar. A ordem importa, porque os dois geradores daqui leem
+o relatorio da analise e os CSV desta pasta: regerar o documento antes de
+atualizar essas copias produz um arquivo com numero velho e cara de novo.
+
+
+AS LIMITACOES NAO PODEM SAIR DE PERTO DO NUMERO
+
+A amostra da peso igual aos dez elos, de Ferro a Challenger, enquanto a
+populacao real do servidor e quase toda de elo baixo. A taxa daqui nao e a
+taxa do BR1. O que vale comparar entre dias e a taxa, nunca a contagem de
+partidas.
+
+Clipe e trailer do mesmo lancamento saem com poucos dias de diferenca e
+medem quase o mesmo pedaco da serie, entao nessas linhas um tipo nao e
+evidencia independente do outro.
+
+A lista completa esta na secao 11 do documento.

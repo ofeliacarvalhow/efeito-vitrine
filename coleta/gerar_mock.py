@@ -1,8 +1,8 @@
 """
 Gera data/mock/daily_pickrate.csv: dados FALSOS no formato do contrato de dados.
 
-Serve para a Pessoa 2 (analise) e a Pessoa 3 (site) trabalharem sem esperar a
-coleta real e sem nunca tocar em data/raw/.
+Serve para a analise e o painel andarem sem esperar a coleta real e sem
+nunca tocar em data/raw/.
 
 Rodar:  .venv/bin/python coleta/gerar_mock.py
 """

@@ -340,42 +340,32 @@ ponto(
 )
 ponto("Escrever a apresentacao de 20 minutos.")
 
-titulo("O que cada pessoa deveria fazer")
+titulo("O que ainda precisa de olho humano")
 
-titulo("Pessoa 1, coleta", 2)
+titulo("O catalogo de eventos", 2)
 ponto(
-    "Trocar a chave da Riot quando ela expirar, o que acontece as 14h de "
-    "sabado. O coletor avisa na tela e retoma sozinho depois da troca."
-)
-ponto(
-    "Conferir o log uma vez por dia e rodar a agregacao e o relatorio de "
-    "qualidade quando quiser um retrato novo."
-)
-
-titulo("Pessoa 2, eventos e analise", 2)
-ponto(
-    "Conferir os oito videos da tabela acima, abrindo cada um. A escolha foi "
+    "Conferir os videos da tabela acima, abrindo cada um. A escolha foi "
     "automatica, e quem assina o dado e uma pessoa."
 )
 ponto(
-    "Decidir, junto com as outras duas, qual momento vale como leitura das "
-    "visualizacoes dos videos, porque esse numero muda todo dia e o contrato "
-    "de dados nao tem coluna de data para ele."
+    "Combinar qual momento vale como leitura das visualizacoes dos videos, "
+    "porque esse numero muda todo dia e o contrato de dados nao tem coluna "
+    "de data para ele."
 )
 ponto(
     "Olhar a coluna de mudancas de balanceamento antes de afirmar qualquer "
     "coisa sobre um campeao."
 )
 
-titulo("Pessoa 3, site", 2)
+titulo("O painel", 2)
 ponto(
-    "Montar o painel no Vercel lendo os arquivos de dados, e deixar visivel "
-    "na tela quando o dado for de desenvolvimento e nao o real."
+    "Deixar visivel na tela quando o dado for de desenvolvimento e nao o "
+    "real."
 )
 ponto(
-    "Lembrar no texto do site que o total de partidas do dia e o total da "
-    "AMOSTRA, nao o total jogado no servidor, entao o que vale comparar "
-    "entre dias e a taxa e nao a contagem."
+    "Lembrar no texto que o total de partidas do dia e o total da AMOSTRA, "
+    "nao o total jogado no servidor, entao o que vale comparar entre dias e "
+    "a taxa e nao a contagem."
 )
 
 titulo("Como rodar")

@@ -33,7 +33,7 @@ from pathlib import Path
 
 from config import PATCH_BASE, PATCHES, RAIZ
 
-#o cache mora no computador da Pessoa 1, fora do Git
+#o cache mora na maquina que roda a coleta, fora do Git
 CACHE_PADRAO = Path(
     r"C:\Users\Lenovo\Documents\efeito-vitrine\data\cache_ddragon"
 )

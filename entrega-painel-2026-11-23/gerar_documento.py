@@ -13,6 +13,7 @@ from __future__ import annotations
 import csv
 import re
 import statistics as st
+import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -27,8 +28,21 @@ RAIZ = AQUI.parent
 RELATORIO = AQUI / "analise-relatorio-completo.txt"
 SAIDA = AQUI / "Efeito-Vitrine-painel-especificacao.docx"
 
+sys.path.insert(0, str(RAIZ / "analise"))
+from efeito_vitrine import prob_de_cauda  # noqa: E402
+
 FONTE = "Times New Roman"
 PRETO = RGBColor(0, 0, 0)
+
+NUMEROS = ["zero", "um", "dois", "tres", "quatro", "cinco", "seis", "sete",
+           "oito", "nove", "dez", "onze", "doze", "treze", "catorze",
+           "quinze", "dezesseis", "dezessete", "dezoito", "dezenove",
+           "vinte"]
+
+
+def por_extenso(n: int) -> str:
+    """O numero escrito, para o texto corrido nao carregar digito solto."""
+    return NUMEROS[n] if 0 <= n < len(NUMEROS) else str(n)
 
 
 #-------------------------------------------------------------- leitura
@@ -86,6 +100,19 @@ for linha in eventos:
     grupo["campeoes"].add(linha["champion"])
 
 POR_TIPO = Counter(g["tipo"] for g in grupos.values())
+
+
+#a mesma contagem do relatorio, mas pelo percentil do LIFT em vez do PICO.
+#as duas nao dao a mesma resposta para clipe, e o documento precisa dizer
+#isso em vez de deixar o leitor descobrir recalculando
+resultado_por_tipo_lift = {}
+for _tipo in sorted({l["event_type"] for l in resultados}):
+    _medidas = [l for l in resultados
+                if l["event_type"] == _tipo and l["percentil_do_lift"]]
+    _acima = sum(1 for l in _medidas if float(l["percentil_do_lift"]) > 50)
+    resultado_por_tipo_lift[_tipo] = (
+        _acima, len(_medidas), prob_de_cauda(_acima, len(_medidas))
+    )
 
 
 def por_data(ids):
@@ -687,8 +714,8 @@ p("Os eventos de skin nao tem video, e por isso a coluna youtube_id deles "
   "musica ganham clipe.")
 
 h("7.1. Os clipes musicais", 2)
-p("Cinco clipes, e sao o material mais forte do estudo, porque o publico e "
-  "enorme e a data e precisa.")
+p(f"{por_extenso(POR_TIPO['clipe']).capitalize()} clipes, e sao o material "
+  "mais forte do estudo, porque o publico e enorme e a data e precisa.")
 for eid in por_data([i for i, g in grupos.items() if g["tipo"] == "clipe"]):
     g = grupos[eid]
     h(f'{g["data"]}, {eid}', 3)
@@ -868,6 +895,23 @@ p("Esta e a pergunta do projeto, e e o numero que vale para concluir. "
   "evento nao fizesse nada, a resposta esperada seria metade.")
 p("O numero por evento, campeao a campeao, serve para olhar e para contar "
   "historia. O numero agrupado serve para concluir.")
+linhas_da_medida = []
+for _t in sorted(resultado_por_tipo):
+    _a, _de, _c = resultado_por_tipo[_t]
+    _al, _del, _cl = resultado_por_tipo_lift[_t]
+    linhas_da_medida.append(
+        [_t, f"{_a} de {_de}", f"{_c:.3f}", f"{_al} de {_del}", f"{_cl:.3f}"]
+    )
+p("Falta dizer qual medida decide esse acima do tipico, e ela nao e "
+  "indiferente. O teste usa o percentil do PICO de 3 dias, a mesma medida "
+  "da coluna destaque descrita em 9.3. Pelo percentil do LIFT de 7 dias, "
+  "que e a medida conservadora, as contagens mudam:")
+tabela(["tipo", "pelo pico", "chance", "pelo lift", "chance"],
+       linhas_da_medida)
+p("A skin conclui igual pelas duas medidas. O clipe muda de lado, e e por "
+  "isso que a decisao da secao 14.4 precisa dizer qual medida o trabalho "
+  "adota. O painel recebe as duas em tipos.json e deve mostrar a mesma que "
+  "o texto adotar.")
 
 h("9.6. O teste de placebo", 2)
 p("A medida inteira e repetida 200 vezes com a data de cada evento "
@@ -919,8 +963,9 @@ p(f"O resultado da skin e o mais forte do estudo: {acima} de {de} campeoes "
   "que de 0,05, e esse resultado passa dos dois.")
 acima, de, chance = resultado_por_tipo["clipe"]
 p(f"O clipe da {acima} de {de}, com chance {chance:.3f}. A direcao e a "
-  "mesma da skin, e a amostra e pequena: cinco clipes, dezesseis pares. "
-  "Nao da para concluir, e tambem nao da para descartar.")
+  f"mesma da skin, e a amostra e pequena: {por_extenso(POR_TIPO['clipe'])} "
+  f"clipes, {por_extenso(de)} pares. Nao da para concluir, e tambem nao da "
+  "para descartar.")
 h("10.1.1. O tamanho do efeito", 3)
 p("O teste por tipo responde se o efeito existe. Esta tabela responde "
   "quanto ele vale, e e o numero que o painel deve mostrar ao lado da "
@@ -1007,8 +1052,8 @@ p("Com o dado atual, e defensavel dizer que o lancamento de skin desloca a "
   "vezes, e entre os que se destacaram do servidor a mediana e de "
   f"{st.median(LIFT_DOS_MARCADOS):.2f} vezes a taxa anterior.")
 p("Nao e defensavel, com este dado, afirmar que o clipe musical sozinho "
-  "produz o mesmo efeito. A direcao aponta para isso, e a amostra de cinco "
-  "clipes nao fecha a conta.")
+  "produz o mesmo efeito. A direcao aponta para isso, e a amostra de "
+  f"{por_extenso(POR_TIPO['clipe'])} clipes nao fecha a conta.")
 p("Tambem nao e defensavel atribuir o efeito a um mecanismo especifico. O "
   "dado mostra que a taxa sobe depois do lancamento e mais do que nos "
   "campeoes de comparacao. Ele nao distingue entre quem comprou a skin e "
@@ -1261,8 +1306,9 @@ visual(
     "pares de todos os campeoes do evento. Abaixo, a tabela com lift, pico, "
     "percentil e ressalva de intervalo por campeao, e o veredito do grupo.",
     "eventos.json e serie.json",
-    "para os cinco clipes vale destacar a diferenca de dias entre o clipe e "
-    "a skin, porque e o que permite separar os dois efeitos."
+    f"para os {por_extenso(POR_TIPO['clipe'])} clipes vale destacar a "
+    "diferenca de dias entre o clipe e a skin, porque e o que permite "
+    "separar os dois efeitos."
 )
 
 visual(
@@ -1289,9 +1335,9 @@ visual(
     "evento. Apenas os eventos com video entram, entao sao poucos pontos e "
     "cada um pode ser rotulado.",
     "eventos.json e serie.json",
-    "com cinco clipes e alguns trailers, esta tela nao sustenta conclusao "
-    "nenhuma, e deve dizer isso. Ela vale como pergunta aberta e como "
-    "convite para a proxima rodada de coleta."
+    f"com {por_extenso(POR_TIPO['clipe'])} clipes e alguns trailers, esta "
+    "tela nao sustenta conclusao nenhuma, e deve dizer isso. Ela vale como "
+    "pergunta aberta e como convite para a proxima rodada de coleta."
 )
 
 visual(
@@ -1367,9 +1413,10 @@ h("14.4. Decisao que ainda nao foi tomada", 2)
 p("Falta combinar entre as tres pessoas se o trabalho conclui sobre clipe "
   "musical ou se limita a conclusao a skin. O dado atual sustenta a "
   "afirmacao sobre skin com folga. Sobre clipe, a direcao e a mesma e a "
-  "amostra de cinco videos nao fecha. As duas escolhas sao defensaveis, e a "
-  "escolha precisa aparecer no texto do trabalho e no painel de forma "
-  "coerente.")
+  f"amostra de {por_extenso(POR_TIPO['clipe'])} videos nao fecha. A escolha "
+  "da medida tambem pesa aqui, e esta na secao 9.5. As duas escolhas sao "
+  "defensaveis, e a escolha precisa aparecer no texto do trabalho e no "
+  "painel de forma coerente.")
 
 doc.save(SAIDA)
 

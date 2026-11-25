@@ -167,33 +167,58 @@ def monta_tipos(linhas: list[dict], resumo: dict, agora: str) -> dict:
                    for data, outro in lista):
                 sobrepostos[tipo] += 1
 
-    saida = []
-    for tipo in sorted(por_tipo):
-        medidas = por_tipo[tipo]
-        acima = sum(1 for m in medidas if m["percentil_do_pico"] > 50)
+    def conta(medidas: list[dict], campo: str) -> dict:
+        acima = sum(1 for m in medidas if m[campo] > 50)
         de = len(medidas)
         ic_de, ic_ate = wilson(acima, de)
-        saida.append({
-            "tipo": tipo,
+        return {
             "acima": acima,
             "de": de,
             "fracao": round(acima / de, 4) if de else None,
             "ic": [round(ic_de, 4), round(ic_ate, 4)],
             "chance": round(prob_de_cauda(acima, de), 4),
+        }
+
+    saida = []
+    for tipo in sorted(por_tipo):
+        medidas = por_tipo[tipo]
+        #pelo pico e a medida que o relatorio usa para concluir. pelo lift e
+        #a conservadora, e as duas nao dao a mesma resposta para clipe, entao
+        #o painel precisa das duas para mostrar de que a conclusao depende
+        linha = conta(medidas, "percentil_do_pico")
+        pelo_lift = [m for m in medidas if m["percentil_do_lift"] is not None]
+        linha.update({
+            "tipo": tipo,
             "eventos": len({m["event_id"] for m in medidas}),
             "sobrepostos": sobrepostos.get(tipo, 0),
+            "pelo_lift": conta(pelo_lift, "percentil_do_lift"),
         })
+        saida.append(linha)
+
     return {
         "gerado_em": agora,
         "dados_de": quando_agregou(),
+        "medida": {
+            "criterio": "percentil_do_pico acima de 50",
+            "pico": ("a melhor janelinha de 3 dias dentro da janela de "
+                     "depois, que e o que captura efeito de novidade"),
+            "alternativa": ("percentil_do_lift acima de 50, a media dos 7 "
+                            "dias inteiros, que e a medida conservadora"),
+            "aviso": ("as duas medidas nao concordam em clipe, entao o "
+                      "numero sozinho nao decide: o trabalho precisa dizer "
+                      "qual medida ele usa, e o painel precisa mostrar a "
+                      "mesma."),
+        },
         "tipos": saida,
         "como_ler": (
             "acima e quantos campeoes daquele tipo ficaram acima do tipico "
             "dos campeoes sem evento nas mesmas datas, de um total de de. "
-            "chance e a de isso acontecer com moeda honesta, entao chance "
-            "pequena e sinal. sobrepostos conta as linhas que tem evento de "
-            "OUTRO tipo do mesmo campeao dentro da janela, e nessas o tipo "
-            "nao e evidencia independente do outro."
+            "os campos de cima sao pelo percentil do PICO, que e a medida do "
+            "relatorio, e pelo_lift traz a mesma conta pelo percentil do "
+            "LIFT. chance e a de isso acontecer com moeda honesta, entao "
+            "chance pequena e sinal. sobrepostos conta as linhas que tem "
+            "evento de OUTRO tipo do mesmo campeao dentro da janela, e "
+            "nessas o tipo nao e evidencia independente do outro."
         ),
     }
 

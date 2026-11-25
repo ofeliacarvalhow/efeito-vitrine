@@ -19,7 +19,13 @@ dados/
                             destaque de cada par de campeao e evento
 
 json/
-    os cinco arquivos que o painel busca com fetch, sem backend
+    os cinco arquivos de dado cru, no estado de 23 de novembro
+
+    ATENCAO: o painel precisa de nove arquivos, e nao destes cinco. O
+    conjunto completo e atual esta em painel/dados, na raiz do projeto, com
+    LEIA-ME proprio. Alem destes cinco ele tem resultados.json, tipos.json,
+    placebo.json com os 200 valores do sorteio, e controle.json com a
+    distribuicao do grupo de controle em cada data de evento.
 
 analise-relatorio-completo.txt
     o relatorio da analise, evento por evento, com o placebo no fim
@@ -48,7 +54,9 @@ Depois que a coleta terminar, rode na raiz do projeto, nesta ordem:
     .venv\Scripts\python.exe analise\efeito_vitrine.py
     .venv\Scripts\python.exe coleta\exportar_json.py
 
-e depois refaca esta pasta com os dois geradores daqui.
+e depois refaca esta pasta com os dois geradores daqui. O
+exportar_json_resultados.py escreve em painel/dados, que e a pasta que o
+painel le.
 
 
 O NUMERO PRINCIPAL
@@ -60,5 +68,11 @@ semana seguinte.
 
 Clipe musical da 11 de 16, com chance 0.105: mesma direcao, amostra pequena.
 Trailer e exposicao nao mostram sinal.
+
+Esses numeros usam o percentil do pico de 3 dias, que e a medida do
+relatorio. Pelo percentil do lift de 7 dias, a medida conservadora, o clipe
+vira 12 de 16 com chance 0.038, e so o clipe muda de lado. A secao 9.5 do
+documento traz as duas contagens lado a lado, e tipos.json traz as duas para
+o painel. Qual delas o trabalho adota e a decisao em aberto da secao 14.4.
 
 As limitacoes estao na secao 11 do documento e nao devem sair do painel.

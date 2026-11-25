@@ -145,7 +145,7 @@ Detalhes de responsabilidade, limites da API e regras do projeto estão em
 
 ## Dicionario de dados
 
-Numeros de 2026-11-23 10:43, fuso America/Sao_Paulo. O `coleta/qualidade.py` reescreve esta secao, entao ela nunca fica velha. O relatorio completo, com partidas dia por dia e versoes do jogo por semana, fica em `data/processed/qualidade.txt`.
+Numeros de 2026-11-25 08:56, fuso America/Sao_Paulo. O `coleta/qualidade.py` reescreve esta secao, entao ela nunca fica velha. O relatorio completo, com partidas dia por dia e versoes do jogo por semana, fica em `data/processed/qualidade.txt`.
 
 ### `daily_pickrate.csv`
 
@@ -157,7 +157,7 @@ Numeros de 2026-11-23 10:43, fuso America/Sao_Paulo. O `coleta/qualidade.py` ree
 | `picks` | inteiro | vezes que o campeao foi escolhido no dia |
 | `pick_rate` | decimal | `picks / games_total`, 6 casas |
 
-Estado atual: **46364 linhas**, 268 dias x 173 campeoes, a partir de **137530 partidas** da fila 420. 268 dos 268 dias do periodo tem partida.
+Estado atual: **46364 linhas**, 268 dias x 173 campeoes, a partir de **165298 partidas** da fila 420. 268 dos 268 dias do periodo tem partida.
 
 Ha uma linha para cada campeao em cada dia do periodo, inclusive dias com zero escolhas. Em dia sem partida nenhuma, `games_total` e `pick_rate` ficam em zero. A lista de campeoes sai dos proprios dados, entao cresce conforme campeoes novos aparecem na coleta.
 

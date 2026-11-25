@@ -15,6 +15,7 @@ import re
 import statistics as st
 import sys
 from collections import Counter, defaultdict
+from datetime import date
 from pathlib import Path
 
 from docx import Document
@@ -1078,26 +1079,109 @@ tabela(
       d["perc_pico"], d["picks"]] for d in destaques],
     larguras=[60, 55, 75, 45, 38, 45, 38, 42], tamanho=9)
 
-p("Alguns casos merecem leitura cuidadosa:")
-lista([
-    "Aphelios aparece tres vezes, no clipe de 18 de setembro, no trailer de "
-    "22 de setembro e na skin de 7 de outubro. Sao tres eventos do mesmo "
-    "lancamento HEARTSTEEL em vinte dias, e o mesmo trecho da serie sustenta "
-    "as tres linhas. O lift dele de 2,34 vezes e o maior do estudo, e nao "
-    "deve ser contado tres vezes",
-    "Akali aparece duas vezes, no clipe de K/DA e na skin de True Damage, "
-    "que sao campanhas diferentes em datas diferentes, e aqui as duas "
-    "linhas tem mais independencia",
-    "Belveth tem o maior lift de skin, 2,26 vezes, com apenas 113 escolhas "
-    "na janela de antes. Campeao pouco escolhido produz lift grande com "
-    "pouca escolha a mais, e e por isso que a coluna de picks importa",
-    "Diana e Leona sobem juntas na mesma skin de Aspecto Eterno, em 28 de "
-    "maio, com 1,78 e 1,51 vezes. Lancamento com duas skins que sobem as "
-    "duas e evidencia melhor que lancamento solo",
-    "Janna sobe 2,29 vezes com a Congregacao das Bruxas, que e a linha que "
-    "nao teve video nenhum. Isso e util para o argumento: a skin sozinha, "
-    "sem campanha de video, deslocou a escolha",
-])
+#os casos que merecem leitura saiam escritos a mao, e envelheceram em
+#silencio: o texto dizia que o maior lift do estudo era do Aphelios com
+#2,34x enquanto a Belveth ja estava em 2,47x, e dizia que a Akali aparecia
+#duas vezes quando ela tinha um destaque so. agora cada caso sai do dado
+MESES = ["janeiro", "fevereiro", "marco", "abril", "maio", "junho", "julho",
+         "agosto", "setembro", "outubro", "novembro", "dezembro"]
+
+
+def por_extenso_data(iso: str) -> str:
+    ano, mes, dia = iso.split("-")
+    return f"{int(dia)} de {MESES[int(mes) - 1]}"
+
+
+def nome_legivel(event_id: str) -> str:
+    """O titulo do evento quando ele existe, senao o id sem o prefixo."""
+    titulo = (grupos.get(event_id) or {}).get("titulo") or ""
+    if titulo:
+        #skins da mesma linha vem com os dois nomes colados por "+"
+        return titulo.split("+")[0].split("|")[0].split("(")[0].strip()[:60]
+    corte = event_id.split("-", 1)
+    return corte[1].replace("-", " ") if len(corte) > 1 else event_id
+
+
+#skin e exposicao sao femininas, clipe e trailer masculinos. sem isso o
+#texto sai com "no skin de 4 de novembro"
+ARTIGO = {"skin": "na", "exposicao": "na", "clipe": "no", "trailer": "no"}
+PLURAL = {1: "uma", 2: "duas", 3: "tres", 4: "quatro", 5: "cinco"}
+
+
+def momento(linha: dict) -> str:
+    return (f"{ARTIGO.get(linha['tipo'], 'no')} {linha['tipo']} de "
+            f"{por_extenso_data(linha['data'])}")
+
+
+def valor(linha: dict) -> float:
+    return float(linha["lift"].rstrip("x"))
+
+
+casos = []
+ja_citados = set()
+
+repetidos = defaultdict(list)
+for d in destaques:
+    repetidos[d["campeao"]].append(d)
+for campeao, linhas in sorted(repetidos.items(),
+                              key=lambda kv: (-len(kv[1]), kv[0])):
+    if len(linhas) < 2:
+        continue
+    linhas = sorted(linhas, key=lambda l: l["data"])
+    quando = ", ".join(momento(l) for l in linhas)
+    dias = (date.fromisoformat(linhas[-1]["data"])
+            - date.fromisoformat(linhas[0]["data"])).days
+    quantos = PLURAL.get(len(linhas), str(len(linhas)))
+    casos.append(
+        f"{campeao} aparece {quantos} vezes, {quando}. Sao {quantos} "
+        f"marcacoes em {dias} dias sustentadas pelo mesmo trecho da serie, "
+        f"e o maior lift, de {max(valor(l) for l in linhas):.2f} vezes, nao "
+        f"vale {quantos} vezes"
+    )
+    ja_citados.add(campeao)
+
+maior = max(destaques, key=valor)
+casos.append(
+    f"{maior['campeao']} tem o maior lift do estudo, {valor(maior):.2f} "
+    f"vezes, {momento(maior)}, com {maior['picks']} escolhas na janela de "
+    "antes. Campeao pouco escolhido produz lift grande com pouca escolha a "
+    "mais, e e por isso que a coluna de picks importa"
+)
+ja_citados.add(maior["campeao"])
+
+#evento que levantou mais de um campeao de uma vez
+juntos = defaultdict(list)
+for d in destaques:
+    juntos[d["evento"]].append(d)
+duplas = [(eid, sorted(ls, key=lambda l: -valor(l)))
+          for eid, ls in juntos.items() if len(ls) > 1]
+duplas.sort(key=lambda par: -max(valor(l) for l in par[1]))
+for eid, linhas in duplas[:2]:
+    nomes = " e ".join(l["campeao"] for l in linhas)
+    lifts = " e ".join(f"{valor(l):.2f}" for l in linhas)
+    casos.append(
+        f"{nomes} sobem no mesmo evento, {nome_legivel(eid)}, em "
+        f"{por_extenso_data(linhas[0]['data'])}, com {lifts} vezes. "
+        "Lancamento que levanta mais de um campeao de uma vez e evidencia "
+        "melhor que lancamento solo"
+    )
+
+#destaque de evento sem video nenhum, que e o caso mais limpo do argumento
+sem_video = [d for d in destaques
+             if not grupos.get(d["evento"], {}).get("youtube")
+             and d["campeao"] not in ja_citados]
+if sem_video:
+    limpo = max(sem_video, key=valor)
+    casos.append(
+        f"{limpo['campeao']} sobe {valor(limpo):.2f} vezes em "
+        f"{nome_legivel(limpo['evento'])}, que nao teve video nenhum. Isso "
+        "ajuda o argumento, porque mostra a skin deslocando a escolha sem "
+        "campanha de video por tras"
+    )
+
+if casos:
+    p("Alguns casos merecem leitura cuidadosa:")
+    lista(casos)
 
 h("10.4. O que se pode afirmar hoje", 2)
 p("Com o dado atual, e defensavel dizer que o lancamento de skin desloca a "

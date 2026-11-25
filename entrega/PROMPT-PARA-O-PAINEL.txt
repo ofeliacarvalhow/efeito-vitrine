@@ -1,0 +1,356 @@
+EFEITO VITRINE
+briefing completo do projeto, para colar inteiro na primeira mensagem
+
+Este texto explica o projeto que esta no repositorio do GitHub que voce
+recebeu. Ele descreve o que foi medido, como foi medido, quais sao os
+numeros atuais e o que cada arquivo de dados carrega. Serve para quem ja
+tem o painel montado e precisa entender o que esta por tras dos numeros
+antes de mexer neles.
+
+Confira no repositorio o que este texto afirmar. Os numeros mudam quando a
+coleta roda de novo, e o campo dados_de em cada arquivo JSON diz de quando
+eles sao.
+
+
+O QUE O PROJETO MEDE
+
+Se o lancamento de uma skin ou de um clipe musical de League of Legends faz
+o campeao ser mais escolhido nas partidas ranqueadas solo, fila 420, do
+servidor brasileiro.
+
+O resultado principal: 61 de 74 campeoes que ganharam skin nova foram
+escolhidos mais vezes na semana seguinte do que o campeao tipico do servidor
+nas mesmas datas. A chance de isso acontecer por acaso e 0,000.
+
+
+A AMOSTRA
+
+    partidas            172.678
+    periodo             24 de fevereiro a 18 de novembro de 2026
+    dias                268
+    partidas por dia    644 em media
+    campeoes            173
+    eventos             60, sendo 49 de skin, 5 de trailer, 4 de clipe
+                        e 2 de exposicao
+    fuso                America/Sao_Paulo
+
+A coleta encerrou em 25 de novembro ao meio-dia. Ela parou no relogio, e nao
+por ter batido a meta: os 172.678 sao 75 por cento do alvo que o coletor
+perseguia. Isso nao distorce nada, porque o coletor enchia as 39 semanas do
+periodo em rodizio, em lotes de 50 partidas, e as 37 semanas cheias ficaram
+todas entre 74,7 e 75,6 por cento do alvo delas. A densidade e parelha em
+todo o periodo.
+
+
+COMO A MEDIDA FUNCIONA
+
+Entender isto importa, porque o painel mostra esses numeros e nao pode
+contradizer o texto escrito do trabalho.
+
+As janelas. Para cada evento, comparamos duas fatias da serie do campeao. A
+janela de antes tem 14 dias, a de depois tem 7, e entre o fim do antes e a
+data do evento ha um recuo de 14 dias. O recuo existe para a expectativa do
+lancamento, que ja move a escolha antes de a skin sair, nao contaminar a
+base de comparacao.
+
+O lift. E a taxa media do depois dividida pela taxa media do antes. O valor
+1,00 significa nenhuma mudanca, e 1,50 significa cinquenta por cento mais
+escolhas.
+
+O pico. E a mesma conta usando a melhor janelinha de 3 dias dentro do
+depois. Ele existe porque efeito de novidade dura pouco e media longa dilui.
+Num teste contra dados falsos, um pico plantado de 2,1 vezes aparece como
+1,41 quando medido pela media de 14 dias.
+
+O percentil. E o nucleo do metodo. O lift de um campeao sozinho nao diz
+nada, porque o servidor inteiro se move junto. Entao calculamos o mesmo lift,
+nas mesmas datas, para todos os campeoes que nao tiveram evento nenhum e nao
+levaram mudanca de balanceamento dentro da janela, e perguntamos onde o
+campeao com evento cai nessa distribuicao. O percentil 50 e o comportamento
+tipico do servidor naquele periodo. O percentil 90 e a fronteira do
+destaque, acima da qual chegou apenas um em cada dez campeoes sem evento. O
+grupo de controle tem entre 119 e 155 campeoes, conforme quantos sairam por
+balanceamento naquela data.
+
+Vale olhar o que o controle faz. O lift mediano dos campeoes sem evento vai
+de 0,92 a 1,02 vezes. O campeao comum do servidor ficou praticamente parado
+no periodo, as vezes de leve em queda, entao a comparacao nao esta sendo
+feita contra um servidor em crescimento.
+
+O intervalo de confianca. E de 95 por cento, pelo metodo de Wilson, que
+serve a proporcao com contagem pequena. Quando o intervalo do antes cruza o
+do depois, a amostra nao sustenta a diferenca, e a linha vem marcada com
+intervalos_se_cruzam verdadeiro.
+
+O teste agrupado por tipo. E o numero com que o trabalho conclui. Juntando
+todos os campeoes de todos os eventos do mesmo tipo, quantos ficaram acima
+do tipico? Se o evento nao fizesse nada, a resposta esperada seria metade,
+como em moeda honesta. A chance vem da distribuicao binomial. Juntar ganha
+poder porque a amostra de cada campeao e pequena, mas os erros deles vao
+para lados independentes.
+
+O teste de placebo. A medida inteira foi repetida 200 vezes com a data de
+cada evento sorteada, mantendo os campeoes verdadeiros. Isso mostra quantos
+destaques o metodo inventa quando nao ha efeito nenhum para achar. O sorteio
+usa semente fixa, entao o resultado e reproduzivel.
+
+
+OS NUMEROS
+
+Teste por tipo, pelo percentil do pico de 3 dias:
+
+    tipo         acima do tipico   chance   leitura
+    skin             61 de 74       0,000   efeito claro
+    trailer          13 de 19       0,084   sugestivo, nao conclusivo
+    clipe            11 de 16       0,105   sugestivo, nao conclusivo
+    exposicao        14 de 24       0,271   sem sinal
+
+Pela media de 7 dias, que e a medida conservadora, a skin da 60 de 74 e o
+trailer da 12 de 19 com chance 0,180. As duas contagens estao em tipos.json,
+no bloco de cada tipo e no bloco pelo_lift. A faixa da leitura e esta:
+abaixo de 0,01 e efeito claro, abaixo de 0,05 e sinal com amostra pequena,
+abaixo de 0,15 e sugestivo sem fechar a conta, e o resto e sem sinal.
+
+Com quatro tipos testados, o corte honesto fica mais perto de 0,01 do que de
+0,05. A skin passa dos dois com folga.
+
+O tamanho do efeito. Juntando os 74 campeoes com skin, inclusive os que nao
+reagiram, o campeao tipico passou a ser escolhido 16 por cento mais vezes na
+semana seguinte. Entre os 23 pares que se destacaram, o lift mediano e 1,73
+vezes, com a metade central entre 1,36 e 1,85. Medido pelo pico, a mediana
+sobe para 1,76 e o maior caso chega a 2,88.
+
+O placebo. Com datas verdadeiras o metodo marcou 22 momentos distintos. Com
+datas sorteadas, media de 9,7, minimo de 3 e maximo de 20. Nenhum dos 200
+sorteios chegou a 22, entao a chance e 0,000.
+
+Alguns casos individuais mudam a leitura, e a secao 10.3 do documento traz
+todos. Aphelios aparece tres vezes entre os destaques, no clipe de 18 de
+setembro, no trailer de 22 de setembro e na skin de 7 de outubro, tudo do
+mesmo lancamento HEARTSTEEL em 19 dias, e o mesmo trecho da serie sustenta
+as tres marcacoes, entao o maior lift dele, 2,35 vezes, nao vale por tres.
+Belveth tem o maior lift do estudo, 2,47 vezes, com 134 escolhas na janela
+de antes, e campeao pouco escolhido produz numero extremo com pouca escolha
+a mais. Janna sobe 2,29 vezes com a Congregacao das Bruxas, que nao teve
+video nenhum, e isso ajuda o argumento, porque mostra a skin deslocando a
+escolha sem campanha de video por tras.
+
+
+DA SKIN LANCADA AO NUMERO MEDIDO
+
+O catalogo tem mais skins do que o resultado tem linhas. A conta inteira:
+
+    97 lancamentos de skin    o que o Data Dragon mostra entre duas versoes
+                              consecutivas, em 86 campeoes
+    49 eventos de skin        skins da mesma linha no mesmo patch viram um
+                              evento so, porque dividem data e campanha, e
+                              as do patch 16.3 ficam de fora porque ele ja
+                              estava no ar quando o periodo comecou
+    81 linhas de campeao      um evento pode trazer varios campeoes
+    74 pares medidos          os que faltam caem perto da borda do periodo,
+                              onde nao sobra janela
+
+No total sao 60 eventos catalogados, 56 com medida, e 133 pares de campeao e
+evento no resultado.
+
+
+O REPOSITORIO
+
+    README.md          a porta de entrada, com o resultado e os comandos
+    CLAUDE.md          as regras do repositorio, incluindo as de escrita
+    painel/dados/      os dez JSON que o painel le, com LEIA-ME proprio
+    entrega/           o documento, os CSV e os relatorios
+    analise/           a estatistica em Python, e o relatorio.txt
+    coleta/            a coleta na API da Riot e os exportadores
+    eventos/           o catalogo de skins, clipes e balanceamento
+    site/              uma versao local em Streamlit, que nao e o painel
+    data/processed/    as tabelas do contrato de dados, em CSV
+    data/mock/         dados falsos no mesmo formato, para desenvolver
+
+Nao existe data/raw/ no repositorio, e isso e proposital. O bruto tem
+partidas individuais e identificadores de jogador, e fica so na maquina que
+coletou. Nada do que foi publicado contem jogador, nome de invocador, puuid
+ou matchId.
+
+
+OS DEZ ARQUIVOS DE DADOS
+
+Ficam em painel/dados/, somam cerca de 420 KB e sao buscados com fetch. O
+LEIA-ME de la detalha cada um.
+
+resumo.json
+    periodo, partidas, partidas_por_dia, campeoes, eventos por tipo, aviso
+
+serie.json
+    dias, campeoes, partidas_por_dia, escolhas. Vem em listas paralelas, e e
+    por isso que cabe em 143 KB em vez de alguns megabytes.
+    escolhas[campeao][i] e quantas vezes o campeao foi escolhido no dia
+    dias[i], e a taxa e esse numero dividido por partidas_por_dia[i]
+
+eventos.json
+    lista de 60, com id, tipo, data, titulo, youtube_id, views, campeoes
+
+patches.json
+    lista de 20, com patch, data, exata, partidas. O campo exata diz se a
+    data foi medida nas proprias partidas ou estimada
+
+balanceamento.json
+    lista de 175, com patch, data, campeao, mudanca
+
+resultados.json
+    janela, contagem e pares. Cada um dos 133 pares traz evento, tipo, data,
+    campeao, taxa_antes, taxa_depois, lift, percentil, lift_do_pico,
+    percentil_do_pico, picks_antes, picks_depois, jogos_antes, jogos_depois,
+    ic_antes, ic_depois, intervalos_se_cruzam, pouca_amostra, destaque,
+    campeoes_no_controle, lift_mediano_do_controle
+
+tipos.json
+    medida, que nomeia o criterio usado, e tipos, com acima, de, fracao, ic,
+    chance, eventos, sobrepostos e um bloco pelo_lift com a mesma conta pela
+    outra medida
+
+placebo.json
+    contagens com os 200 valores do sorteio, real, media, minimo, maximo,
+    percentil_95, empataram_ou_passaram, chance
+
+controle.json
+    por event_id, as listas ordenadas pico e lift do grupo de controle
+    naquela data, mais campeoes e fora_por_mexida. Cobre 56 dos 60 eventos,
+    porque quatro caem perto da borda do periodo
+
+campeoes.json
+    a mesma informacao virada do avesso, um registro por campeao, com
+    eventos em ordem de data, balanceamento, escolhas_no_periodo, taxa_media
+    e destaques. Mais sem_evento, que lista os 96 campeoes sem evento
+    nenhum, que sao o grupo de controle
+
+
+POR QUE O RESULTADO VEM PRONTO
+
+Percentil, lift, intervalo e placebo ja estao calculados nos arquivos. Isso
+e deliberado. Se o navegador refizesse essas contas, a tela poderia mostrar
+um numero diferente do que o documento afirma, e o trabalho se contradiria
+na frente de quem esta avaliando.
+
+O controle.json existe exatamente por isso. Com ele, o histograma de cada
+campeao e a seta que marca onde ele caiu saem do mesmo numero que a analise
+usou, sem reconstrucao no navegador.
+
+Filtrar, ordenar, agrupar para exibicao e desenhar sao operacoes seguras.
+Recalcular janela, percentil ou placebo nao e.
+
+
+AS DUAS DATAS
+
+Todo arquivo em formato de objeto traz dois campos:
+
+    dados_de     quando a coleta foi agregada. Esta e a data do retrato
+    gerado_em    quando o arquivo foi escrito, que pode ser horas depois
+
+A data que deve aparecer na tela e dados_de. O gerado_em anda sozinho sempre
+que o exportador roda, mesmo sem dado novo, e mostrar ele faz o painel
+parecer mais recente do que e.
+
+serie.json, eventos.json, patches.json e balanceamento.json sao listas e nao
+tem os campos. A data deles e a do resumo.json.
+
+
+AS LIMITACOES
+
+O documento traz oito na secao 11, e elas precisam ficar visiveis, nao em
+letra pequena no rodape. As que mais afetam a leitura de um numero na tela:
+
+A amostra da peso igual aos dez elos, de Ferro a Challenger, enquanto a
+populacao real do servidor e quase toda de elo baixo. A taxa daqui nao e a
+taxa do BR1. O que vale comparar entre dias e a taxa, nunca a contagem de
+partidas.
+
+O estudo e observacional. Nao houve sorteio de quem recebe skin, entao a
+conclusao e de associacao e nao de causa provada. O placebo e o grupo de
+controle reduzem o risco, sem elimina-lo.
+
+Skin e balanceamento as vezes andam juntos no mesmo patch, e nesses casos as
+duas explicacoes se sobrepoem. O relatorio marca essas linhas com
+[confundido].
+
+Clipe, trailer e skin da mesma linha saem em poucos dias e medem pedacos
+sobrepostos da serie. O campo sobrepostos em tipos.json conta quantas linhas
+estao nessa situacao, e nelas um tipo nao e evidencia independente do outro.
+
+Campeao com menos de 100 escolhas na janela de antes vem com pouca_amostra
+verdadeiro. Esse numero nao deve ser lido sozinho, e a tela precisa marca-lo,
+em cinza ou com um selo.
+
+A coluna views e um retrato do momento da leitura e muda todo dia. Nao ha
+coluna de data para ela no contrato.
+
+O periodo cobre nove meses de um ano. Efeito sazonal, como ferias ou a
+semana do campeonato mundial, aparece no dado sem estar separado.
+
+
+ONDE LER MAIS
+
+entrega/Efeito-Vitrine-painel-especificacao.docx
+    o documento completo. Metodologia nas secoes 9.1 a 9.7, resultados na
+    10, limitacoes na 11, os dados do painel na 12, e a especificacao das
+    treze telas na 13. A secao 13.14 traz as decisoes visuais que valem para
+    todas elas: quatro cores fixas, uma por tipo de evento, cinza sempre
+    para o grupo de controle, taxa em porcentagem com uma casa, lift no
+    formato 1,78x
+
+analise/relatorio.txt
+    663 linhas, um bloco para cada um dos 56 eventos medidos, com todo
+    campeao, taxa antes e depois, lift, percentil, pico e escolhas cruas,
+    mais o teste do grupo e as ressalvas
+
+entrega/qualidade-da-amostra.txt
+    partidas dia por dia, versoes do jogo por semana e os avisos de leitura
+
+painel/dados/LEIA-ME.txt
+    o formato de cada JSON, com exemplos
+
+entrega/dados/resultados_por_campeao_evento.csv
+    os mesmos 133 pares do resultados.json, em CSV, para abrir no Excel
+
+
+O QUE MUDOU NESTA VERSAO
+
+Se voce ja tinha a entrega de 23 de novembro, estas sao as diferencas.
+
+A amostra cresceu de 137.520 para 172.678 partidas, e a media diaria subiu
+de 513 para 644. Os numeros por tipo se moveram junto: a skin foi de 60 para
+61 de 74, o trailer de 11 para 13 de 19, a exposicao de 13 para 14 de 24, e
+o clipe ficou em 11 de 16. O placebo ficou mais forte, de chance 0,005 para
+0,000.
+
+A entrega antiga tinha cinco arquivos JSON. Agora sao dez. Entraram
+resultados.json, tipos.json, placebo.json, controle.json e campeoes.json.
+Os quatro primeiros existem para o painel nao recalcular nada, e o ultimo
+existe porque todo o resto esta organizado por evento, o que obrigava quem
+quisesse olhar um campeao especifico a varrer varios blocos. Vinte e cinco
+campeoes tiveram mais de um evento no periodo, e a Akali teve seis.
+
+O documento ganhou tres correcoes. A secao 9.5 passou a dizer qual medida
+decide o acima do tipico, que e o percentil do pico, e traz a tabela com as
+duas contagens lado a lado. O texto dizia cinco clipes em seis frases, e sao
+quatro. A leitura de cada tipo na tabela de resultados era texto fixo e
+dizia sem sinal para o trailer mesmo depois de ele chegar a 0,084, e agora
+ela sai da propria chance.
+
+A secao 7.5 e nova e mostra a cadeia de 97 skins ate 74 pares medidos num
+lugar so.
+
+
+UMA COISA QUE AINDA NAO FOI DECIDIDA
+
+Se o trabalho conclui sobre clipe musical ou limita a conclusao a skin. O
+dado sustenta a afirmacao sobre skin com folga. Sobre clipe, a direcao e a
+mesma e quatro videos nao fecham a conta. As duas escolhas sao defensaveis,
+e a escolha precisa aparecer no texto e no painel de forma coerente.
+
+O mesmo vale para a medida. Pelo pico o trailer da 0,084 e pela media de 7
+dias da 0,180, e qual das duas o trabalho adota muda o que se pode dizer
+sobre ele.
+
+Nenhuma das duas esta resolvida, entao vale perguntar antes de escrever
+frase conclusiva sobre clipe ou trailer.

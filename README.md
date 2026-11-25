@@ -211,7 +211,7 @@ estão em [`CLAUDE.md`](CLAUDE.md).
 
 ## Dicionario de dados
 
-Numeros de 2026-11-25 12:39, fuso America/Sao_Paulo. O `coleta/qualidade.py` reescreve esta secao, entao ela nunca fica velha. O relatorio completo, com partidas dia por dia e versoes do jogo por semana, fica em `data/processed/qualidade.txt`.
+Numeros de 2026-11-25 12:50, fuso America/Sao_Paulo. O `coleta/qualidade.py` reescreve esta secao, entao ela nunca fica velha. O relatorio completo, com partidas dia por dia e versoes do jogo por semana, fica em `data/processed/qualidade.txt`.
 
 ### `daily_pickrate.csv`
 

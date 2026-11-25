@@ -31,7 +31,7 @@ jogador aparece em arquivo nenhum.
 | `coleta/` | coleta na API da Riot, agregação, qualidade, skins, exportação |
 | `eventos/` | catálogo de skins, clipes, trailers e balanceamento |
 | `analise/` | estatística, antes e depois, gráficos |
-| `painel/dados/` | os nove JSON que o painel busca com `fetch` |
+| `painel/dados/` | os dez JSON que o painel busca com `fetch` |
 | `entrega/` | o pacote fechado para quem monta o painel |
 | `site/` | o site em Streamlit |
 | `data/processed/` | as tabelas do contrato de dados |
@@ -72,9 +72,9 @@ gerado pela coleta.
 
 ## Os JSON do painel
 
-`painel/dados/` tem nove arquivos, cerca de 370 KB, com LEIA-ME próprio. Os
+`painel/dados/` tem dez arquivos, cerca de 420 KB, com LEIA-ME próprio. Os
 cinco primeiros saem de `coleta/exportar_json.py` e carregam o dado da
-coleta. Os quatro de resultado saem de `coleta/exportar_json_resultados.py`
+coleta. Os cinco de resultado saem de `coleta/exportar_json_resultados.py`
 e carregam o que a análise concluiu, para o painel não refazer conta no
 navegador e arriscar mostrar número diferente do relatório.
 

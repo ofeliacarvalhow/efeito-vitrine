@@ -41,7 +41,7 @@ painel precisam dizer a mesma coisa sobre isso.
 coleta/      coleta na API da Riot, agregação, qualidade, exportação
 eventos/     catálogo de skins, clipes, trailers e balanceamento
 analise/     estatística, antes e depois, gráficos
-painel/      os nove JSON que o painel lê
+painel/      os dez JSON que o painel lê
 entrega/     o pacote fechado para quem monta o painel
 site/        o site em Streamlit
 data/        processed, mock e raw
@@ -57,7 +57,7 @@ formato do contrato.
 O painel vai para a Vercel como site estático. A Vercel não roda Python,
 então o painel não lê os CSV: ele busca JSON com `fetch`, sem backend.
 
-Os nove arquivos estão em `painel/dados/`, somam cerca de 370 KB e têm um
+Os dez arquivos estão em `painel/dados/`, somam cerca de 420 KB e têm um
 LEIA-ME próprio explicando o formato de cada um.
 
 | arquivo | o que tem |
@@ -71,6 +71,7 @@ LEIA-ME próprio explicando o formato de cada um.
 | `tipos.json` | o teste agrupado por tipo, nas duas medidas |
 | `placebo.json` | as 200 contagens do sorteio e a contagem real |
 | `controle.json` | a distribuição do grupo de controle em cada data de evento |
+| `campeoes.json` | um registro por campeão, com os eventos dele, o balanceamento e quanto foi escolhido |
 
 A série vem em listas paralelas em vez de um objeto por linha, e é só por
 isso que ela cabe em 140 KB. `escolhas[campeao][i]` é quantas vezes o campeão
@@ -210,7 +211,7 @@ estão em [`CLAUDE.md`](CLAUDE.md).
 
 ## Dicionario de dados
 
-Numeros de 2026-11-25 12:16, fuso America/Sao_Paulo. O `coleta/qualidade.py` reescreve esta secao, entao ela nunca fica velha. O relatorio completo, com partidas dia por dia e versoes do jogo por semana, fica em `data/processed/qualidade.txt`.
+Numeros de 2026-11-25 12:29, fuso America/Sao_Paulo. O `coleta/qualidade.py` reescreve esta secao, entao ela nunca fica velha. O relatorio completo, com partidas dia por dia e versoes do jogo por semana, fica em `data/processed/qualidade.txt`.
 
 ### `daily_pickrate.csv`
 

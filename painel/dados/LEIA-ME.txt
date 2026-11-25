@@ -1,4 +1,4 @@
-OS NOVE JSON DO PAINEL
+OS DEZ JSON DO PAINEL
 
 
 O painel busca estes arquivos com fetch e desenha a partir deles. A Vercel
@@ -6,7 +6,7 @@ serve estatico e nao roda Python, entao o painel nao le os CSV de
 data/processed: le daqui.
 
 Nenhum numero aqui e conta nova. Os cinco primeiros saem da coleta agregada
-e os quatro de resultado saem das proprias funcoes de
+e os cinco de resultado saem das proprias funcoes de
 analise/efeito_vitrine.py, entao eles batem com analise/relatorio.txt.
 
 
@@ -39,6 +39,10 @@ tipos.json          o teste agrupado por tipo nas duas medidas, com
 placebo.json        as 200 contagens com data sorteada e a contagem real
 controle.json       a distribuicao do grupo de controle em cada data de
                     evento, que e o fundo do histograma de cada campeao
+campeoes.json       um registro por campeao, com os eventos dele em ordem
+                    de data, as mexidas de balanceamento que ele levou,
+                    quanto ele foi escolhido no periodo e quantos destaques
+                    acumulou
 
 
 COMO LER A SERIE
@@ -67,6 +71,17 @@ posicionada por conta. destaque e percentil_do_pico igual ou acima de 90.
 controle.json tem 56 eventos e nao 60. Os outros quatro caem perto da borda
 do periodo e nao sobra janela para montar grupo de controle, e os pares
 deles tambem nao aparecem em resultados.json.
+
+
+A TELA DE CAMPEAO
+
+campeoes.json existe porque todo o resto esta organizado por evento, e quem
+pergunta o que aconteceu com um campeao especifico teria que varrer varios
+blocos para juntar a resposta. Vinte e cinco campeoes tiveram mais de um
+evento no periodo, e a Akali teve seis.
+
+O campo sem_evento lista os 96 campeoes que nao tiveram evento nenhum. Sao
+eles que formam o grupo de controle contra o qual todo percentil foi medido.
 
 
 AS DUAS MEDIDAS EM tipos.json

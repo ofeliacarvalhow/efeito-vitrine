@@ -42,13 +42,13 @@ gerar_csv_resultados.py
 
 OS JSON DO PAINEL NAO ESTAO AQUI
 
-O painel le nove arquivos JSON, e eles ficam em painel/dados, na raiz do
+O painel le dez arquivos JSON, e eles ficam em painel/dados, na raiz do
 projeto, com LEIA-ME proprio. Esta pasta guarda os CSV e o documento.
 
 Alem dos cinco arquivos de dado cru, painel/dados tem resultados.json com os
 133 pares medidos, tipos.json com o teste agrupado, placebo.json com as 200
-contagens do sorteio e controle.json com a distribuicao do grupo de controle
-em cada data de evento.
+contagens do sorteio, controle.json com a distribuicao do grupo de controle
+em cada data de evento e campeoes.json com um registro por campeao.
 
 
 O RESULTADO

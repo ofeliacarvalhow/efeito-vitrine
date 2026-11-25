@@ -1,6 +1,6 @@
 # Painel
 
-`dados/` tem os nove JSON que o painel busca com `fetch`, mais um LEIA-ME
+`dados/` tem os dez JSON que o painel busca com `fetch`, mais um LEIA-ME
 com o formato de cada um e o que não deve ser recalculado no navegador.
 
 O painel vai para a Vercel como site estático. Não há passo de build e não

@@ -280,7 +280,7 @@ def resumo_da_entrega() -> str:
         "",
         "O QUE TEM NA PASTA",
         "",
-        "    dados/        os nove JSON que o painel busca com fetch, e um",
+        "    dados/        os dez JSON que o painel busca com fetch, e um",
         "                  LEIA-ME proprio com o formato de cada um",
         "    o docx        metodologia, resultados e as 13 telas",
         "    o csv         a mesma tabela do resultados.json, para o Excel",

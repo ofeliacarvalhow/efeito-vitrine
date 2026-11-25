@@ -776,6 +776,33 @@ for eid in por_data([i for i, g in grupos.items() if g["tipo"] == "skin"]):
 tabela(["data", "evento", "campeoes"], linhas,
        larguras=[65, 155, 220], tamanho=8)
 
+h("7.5. Da skin lancada ao numero medido", 2)
+p("O catalogo tem mais skins do que o resultado tem linhas. Parte da "
+  "diferenca vem do agrupamento de skins da mesma linha, e parte vem das "
+  "bordas do periodo. A conta inteira fica aqui, porque ela e a primeira "
+  "pergunta de quem compara a secao 6 com a secao 10.")
+linhas_da_cadeia = [
+    [f"{len(skins)} lancamentos de skin",
+     "o que o Data Dragon mostra entre duas versoes consecutivas, em "
+     f"{len({s['champion'] for s in skins})} campeoes"],
+    [f"{POR_TIPO['skin']} eventos de skin",
+     "skins da mesma linha no mesmo patch viram um evento so, porque "
+     "dividem data e campanha, e as skins do patch 16.3 ficam de fora "
+     "porque ele ja estava no ar quando o periodo comecou"],
+    [f"{len([l for l in eventos if l['event_type'] == 'skin'])} linhas de "
+     "campeao e evento", "um evento pode trazer varios campeoes, como a "
+     "linha com tres ou quatro skins no mesmo patch"],
+    [f"{len([l for l in resultados if l['event_type'] == 'skin'])} pares "
+     "medidos", "os que ficaram de fora caem perto da borda do periodo, "
+     "onde nao sobra janela de antes ou de depois, ou sao campeao sem "
+     "escolha nenhuma na janela de antes"],
+]
+tabela(["etapa", "por que o numero muda"], linhas_da_cadeia,
+       larguras=[150, 290], tamanho=9)
+p("A mesma logica vale para os outros tipos. No total sao 60 eventos "
+  f"catalogados, {len({l['event_id'] for l in resultados})} com medida, e "
+  f"{len(resultados)} pares de campeao e evento no resultado.")
+
 doc.add_page_break()
 
 #-------------------------------------------------------------- 8
@@ -1127,16 +1154,19 @@ p("A serie vem como listas paralelas, e nao como um objeto por linha, e e "
 p("Como sao arquivos estaticos, eles sao um retrato. O exportador precisa "
   "rodar de novo sempre que a coleta avancar, e a data do retrato deve "
   "aparecer na tela, para ninguem apresentar numero velho sem saber.")
-p("Alem dos cinco arquivos de dado cru, o painel recebe quatro de "
+p("Alem dos cinco arquivos de dado cru, o painel recebe cinco de "
   "resultado, e sao eles que sustentam as telas de resultado. "
   "resultados.json tem a tabela por campeao e por evento descrita na secao "
   "4.6, a mesma do CSV desta pasta. tipos.json tem o teste agrupado nas "
   "duas medidas. placebo.json tem as 200 contagens do sorteio e a real. "
   "controle.json tem a distribuicao do grupo de controle em cada data de "
-  "evento, que e o fundo do histograma da tela 13.4.")
+  "evento, que e o fundo do histograma da tela 13.4. campeoes.json tem a "
+  "mesma tabela virada do avesso, um registro por campeao, com os eventos "
+  "dele em ordem de data, as mexidas de balanceamento que ele levou e "
+  "quanto ele foi escolhido no periodo, que e o que a tela 13.9 pede.")
 p("Com esses quatro, nenhuma tela precisa refazer conta de janela, de "
   "percentil ou de placebo no navegador, e por isso nenhuma corre o risco "
-  "de mostrar numero diferente do relatorio. Os nove arquivos ficam em "
+  "de mostrar numero diferente do relatorio. Os dez arquivos ficam em "
   "painel/dados, na raiz do projeto, com LEIA-ME proprio.")
 
 h("12.1. O que o painel nao deve calcular sozinho", 2)
@@ -1385,7 +1415,7 @@ h("14.1. A coleta, encerrada", 2)
 p("A coleta encerrou em 25 de novembro ao meio-dia, no horario marcado, e "
   "fechou o ciclo completo de agregacao, qualidade, catalogo de eventos, "
   "analise e exportacao. O que ela deixou pronto esta descrito na secao 12: "
-  "nove arquivos JSON que o painel busca, mais os CSV e o relatorio.")
+  "dez arquivos JSON que o painel busca, mais os CSV e o relatorio.")
 p("O atalho que religava o coletor saiu da pasta de inicializacao do "
   "Windows, entao a maquina nao volta a coletar sozinha num reinicio.")
 
@@ -1402,7 +1432,7 @@ lista([
 ])
 
 h("14.3. O painel", 2)
-p("O painel le os nove arquivos de painel/dados com fetch e vai para a "
+p("O painel le os dez arquivos de painel/dados com fetch e vai para a "
   "Vercel como site estatico, sem backend. As cinco primeiras telas da "
   "secao 13 sao as que sustentam o argumento, e as outras oito servem para "
   "explorar. A data do retrato aparece em toda tela, e as limitacoes da "

@@ -16,6 +16,9 @@ Saem tres arquivos:
                    que e o histograma da tela do placebo
   controle.json    a distribuicao do grupo de controle em cada data de
                    evento, que e o fundo cinza do histograma de cada campeao
+  campeoes.json    o mesmo dado virado do avesso, um registro por campeao,
+                   com os eventos dele, o balanceamento no periodo e quanto
+                   ele foi escolhido
 
 A tabela de resultado vem de coleta/resultados.py e o placebo vem de
 analise/efeito_vitrine.py, entao nenhum numero daqui e conta nova.
@@ -300,6 +303,78 @@ def monta_controle(resumo: dict, agora: str) -> dict:
     }
 
 
+def monta_campeoes(dados: dict, linhas: list[dict], agora: str) -> dict:
+    """A tabela por evento virada do avesso, um registro por campeao.
+
+    Tudo o que existe e organizado por evento, e quem pergunta "o que
+    aconteceu com a Akali" tem que varrer seis blocos separados para juntar
+    a resposta. Vinte e cinco campeoes tem mais de um evento no periodo.
+    Este arquivo responde direto, e e o que a tela de campeao do painel
+    precisa sem refazer conta nenhuma.
+    """
+    tabela = dados["tabela"]
+    dias = tabela["dias"]
+    por_campeao: dict[str, dict] = {}
+
+    for l in sorted(linhas, key=lambda x: (x["event_date"], x["event_id"])):
+        reg = por_campeao.setdefault(l["champion"], {
+            "eventos": [], "balanceamento": [],
+        })
+        reg["eventos"].append({
+            "evento": l["event_id"],
+            "tipo": l["event_type"],
+            "data": l["event_date"],
+            "taxa_antes": arredonda(l["taxa_antes"], 6),
+            "taxa_depois": arredonda(l["taxa_depois"], 6),
+            "lift": arredonda(l["lift"], 4),
+            "lift_do_pico": arredonda(l["lift_do_pico"], 4),
+            "percentil": arredonda(l["percentil_do_lift"], 1),
+            "percentil_do_pico": arredonda(l["percentil_do_pico"], 1),
+            "destaque": bool(l["destaque"]),
+            "pouca_amostra": bool(l["pouca_amostra"]),
+            "intervalos_se_cruzam": bool(l["intervalos_se_cruzam"]),
+        })
+
+    #o balanceamento entra no registro de quem levou mexida, com a data,
+    #porque e a primeira coisa que alguem pergunta quando um campeao sobe
+    for campeao, datas in dados["balanceamento"].items():
+        if campeao in por_campeao:
+            por_campeao[campeao]["balanceamento"] = [
+                d.isoformat() for d in sorted(datas)
+            ]
+
+    #quanto cada campeao foi escolhido no periodo todo, para a tela ordenar
+    #por popularidade sem somar 268 dias no navegador.
+    #prepara_tabela guarda soma ACUMULADA, entao o total do periodo e o
+    #ultimo elemento do vetor, nao a soma dele
+    partidas = tabela["jogos"][-1] if tabela["jogos"] else 0
+    for campeao, reg in por_campeao.items():
+        acumulado = tabela["escolhas"].get(campeao) or [0]
+        escolhas = acumulado[-1]
+        reg["escolhas_no_periodo"] = escolhas
+        reg["taxa_media"] = round(escolhas / partidas, 6) if partidas else None
+        reg["destaques"] = sum(1 for e in reg["eventos"] if e["destaque"])
+
+    com_evento = set(por_campeao)
+    sem_evento = [c for c in dados["campeoes"] if c not in com_evento]
+
+    return {
+        "gerado_em": agora,
+        "dados_de": quando_agregou(),
+        "campeoes": dict(sorted(por_campeao.items())),
+        "sem_evento": sem_evento,
+        "como_ler": (
+            "campeoes tem um registro por campeao que teve ao menos um "
+            "evento no periodo, com a lista de eventos dele em ordem de "
+            "data, as datas em que ele levou mexida de balanceamento, "
+            "quantas vezes foi escolhido no periodo todo e quantos "
+            "destaques acumulou. sem_evento lista os campeoes que nao "
+            "tiveram evento nenhum: sao eles que formam o grupo de "
+            "controle contra o qual todo percentil foi medido."
+        ),
+    }
+
+
 def main() -> int:
     repeticoes = REPETICOES_PLACEBO
     if len(sys.argv) > 1:
@@ -325,6 +400,7 @@ def main() -> int:
         ("tipos.json", tipos),
         ("placebo.json", pl),
         ("controle.json", monta_controle(resumo, agora)),
+        ("campeoes.json", monta_campeoes(dados, linhas, agora)),
     ]
 
     print(f"{SAIDA.relative_to(RAIZ)}:")

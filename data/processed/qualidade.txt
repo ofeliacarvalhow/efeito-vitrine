@@ -1,5 +1,5 @@
 RELATORIO DE QUALIDADE DA COLETA
-gerado em 2026-11-25 12:29 (America/Sao_Paulo)
+gerado em 2026-11-25 12:39 (America/Sao_Paulo)
 
 PARTIDAS
   partidas unicas na fila 420: 172678

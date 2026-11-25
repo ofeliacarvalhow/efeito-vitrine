@@ -45,6 +45,23 @@ def por_extenso(n: int) -> str:
     return NUMEROS[n] if 0 <= n < len(NUMEROS) else str(n)
 
 
+def veredito(chance: float) -> str:
+    """A leitura de uma chance, nas mesmas faixas em todo o documento.
+
+    Ficava escrito a mao em cada linha da tabela, e o trailer passou de
+    0.324 para 0.084 quando a coleta cresceu, enquanto a celula continuava
+    dizendo "sem sinal". Texto fixo ao lado de numero que anda vira mentira
+    sozinho.
+    """
+    if chance < 0.01:
+        return "efeito claro"
+    if chance < 0.05:
+        return "sinal, com amostra pequena"
+    if chance < 0.15:
+        return "sugestivo, nao conclusivo"
+    return "sem sinal"
+
+
 #-------------------------------------------------------------- leitura
 
 def ler(nome: str) -> list[dict]:
@@ -968,17 +985,10 @@ h("10.1. O resultado por tipo de evento", 2)
 tabela(
     ["tipo", "acima do tipico", "de", "chance por acaso", "leitura"],
     [
-        ["skin", resultado_por_tipo["skin"][0], resultado_por_tipo["skin"][1],
-         f'{resultado_por_tipo["skin"][2]:.3f}', "efeito claro"],
-        ["clipe", resultado_por_tipo["clipe"][0],
-         resultado_por_tipo["clipe"][1],
-         f'{resultado_por_tipo["clipe"][2]:.3f}', "sugestivo, nao conclusivo"],
-        ["trailer", resultado_por_tipo["trailer"][0],
-         resultado_por_tipo["trailer"][1],
-         f'{resultado_por_tipo["trailer"][2]:.3f}', "sem sinal"],
-        ["exposicao", resultado_por_tipo["exposicao"][0],
-         resultado_por_tipo["exposicao"][1],
-         f'{resultado_por_tipo["exposicao"][2]:.3f}', "sem sinal"],
+        [tipo, resultado_por_tipo[tipo][0], resultado_por_tipo[tipo][1],
+         f"{resultado_por_tipo[tipo][2]:.3f}",
+         veredito(resultado_por_tipo[tipo][2])]
+        for tipo in ["skin", "clipe", "trailer", "exposicao"]
     ],
     larguras=[70, 90, 40, 95, 145], tamanho=10)
 
@@ -1018,12 +1028,30 @@ p(f"Entre os {len(MARCADOS)} pares que se destacaram, o lift mediano e "
   f"Medido pelo pico de 3 dias, a mediana sobe para "
   f"{st.median(PICO_DOS_MARCADOS):.2f} vezes e o maior caso chega a "
   f"{PICO_DOS_MARCADOS[-1]:.2f} vezes.")
-p("Trailer e exposicao nao mostram sinal. Faz sentido para a exposicao, em "
-  "que o campeao aparece de passagem numa cerimonia sem ser o assunto. Para "
-  "o trailer o resultado pede cautela, porque trailer e clipe do mesmo "
-  "lancamento saem com poucos dias de diferenca e medem quase o mesmo "
-  "pedaco da serie, entao as linhas desses dois tipos nao sao evidencia "
-  "independente uma da outra.")
+sem_sinal = [tipo for tipo in ["clipe", "trailer", "exposicao"]
+             if resultado_por_tipo[tipo][2] >= 0.15]
+sugestivos = [tipo for tipo in ["clipe", "trailer", "exposicao"]
+              if resultado_por_tipo[tipo][2] < 0.15]
+if sem_sinal:
+    verbo = "nao mostram sinal" if len(sem_sinal) > 1 else "nao mostra sinal"
+    frase = f"{' e '.join(sem_sinal).capitalize()} {verbo}."
+    if "exposicao" in sem_sinal:
+        frase += (" Para a exposicao isso era esperado, porque o campeao "
+                  "aparece de passagem numa cerimonia sem ser o assunto "
+                  "dela.")
+    p(frase)
+if sugestivos:
+    nomes = " e ".join(sugestivos)
+    chances = ", ".join(f"{t} em {resultado_por_tipo[t][2]:.3f}"
+                        for t in sugestivos)
+    p(f"{nomes.capitalize()} ficam numa faixa que sugere algo sem fechar a "
+      f"conta, com {chances}. O corte honesto aqui esta mais perto de 0,01 "
+      "do que de 0,05, porque sao quatro tipos testados, e nenhum dos dois "
+      "chega perto disso.")
+p("O trailer pede uma cautela a mais. Trailer e clipe do mesmo lancamento "
+  "saem com poucos dias de diferenca e medem quase o mesmo pedaco da serie, "
+  "entao as linhas desses dois tipos nao sao evidencia independente uma da "
+  "outra, e o numero de um carrega parte do outro.")
 
 h("10.2. O teste de placebo", 2)
 p(f"Dos 200 sorteios com data trocada, {PLACEBO[0]} empatou ou passou o "

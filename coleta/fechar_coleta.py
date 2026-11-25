@@ -211,6 +211,7 @@ def monta_downloads(numero: int, total: int) -> Path | None:
         (ENTREGA / "dados" / "resultados_por_campeao_evento.csv", None),
         (ENTREGA / "analise-relatorio-completo.txt", None),
         (ENTREGA / "qualidade-da-amostra.txt", None),
+        (ENTREGA / "PROMPT-PARA-O-PAINEL.md", None),
     ]:
         shutil.copy2(origem, alvo / (nome or origem.name))
 
@@ -286,6 +287,8 @@ def resumo_da_entrega() -> str:
         "    o csv         a mesma tabela do resultados.json, para o Excel",
         "    relatorio     a analise evento por evento",
         "    qualidade     partidas dia por dia e os avisos de leitura",
+        "    o prompt      o briefing para quem for montar o painel, para",
+        "                  colar inteiro na primeira mensagem",
         "",
     ]
     return "\n".join(linhas) + "\n"
